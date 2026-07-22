@@ -9,7 +9,7 @@
 <meta name="apple-mobile-web-app-title" content="NEON TIDE">
 <link rel="manifest" href="./manifest.webmanifest">
 <link rel="apple-touch-icon" href="./icon-192.png">
-<title>네온 타이드 V3.8 · 가상 패드·무기별 특수탄</title>
+<title>네온 타이드 V3.9 · 표준 가상 패드</title>
 <style>
   :root{--red:#e23725;--amber:#f2a93b;--cream:#f3ead2;--blue:#2f6fc8;--panel:#05070c}
   *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
@@ -53,7 +53,7 @@
     border-radius:50%;
     border:2px solid rgba(190,220,255,.72);
     background:
-      radial-gradient(circle at center,rgba(80,135,190,.15) 0 28%,rgba(5,12,24,.58) 29% 66%,rgba(0,0,0,.68) 67%);
+      radial-gradient(circle at center,rgba(80,135,190,.12) 0 24%,rgba(5,12,24,.58) 25% 67%,rgba(0,0,0,.68) 68%);
     box-shadow:inset 0 0 0 1px rgba(255,255,255,.12);
     touch-action:none;
   }
@@ -87,7 +87,7 @@
   #move-label{
     position:absolute;
     left:50%;
-    bottom:5px;
+    bottom:4px;
     transform:translateX(-50%);
     color:rgba(220,240,255,.72);
     font-size:7px;
@@ -113,8 +113,8 @@
   <div id="menu" class="overlay">
     <div>
       <h1 class="title">NEON TIDE</h1>
-      <div class="subtitle">모바일 캠페인 · 고정 가상 패드 · 주무기별 특수탄</div>
-      <p class="copy">왼쪽의 보이는 가상 패드로 이동합니다. 처음에는 직선 발칸으로 시작하고, 미사일 아이템을 먹으면 주무기와 파란 특수탄이 함께 해당 계열로 변경됩니다.</p>
+      <div class="subtitle">모바일 캠페인 · 표준 가상 패드 · 주무기별 특수탄</div>
+      <p class="copy">왼쪽 패드는 손가락을 누른 위치를 기준점으로 사용합니다. 누르는 순간에는 움직이지 않고, 움직인 거리만큼 정확히 비례해 기체가 이동합니다.</p>
       <button id="start-button" class="main-button" type="button">캠페인 시작 · 1단계</button>
       <section class="record-panel" aria-label="누적 캠페인 기록">
         <div class="record-grid">
@@ -129,7 +129,7 @@
         </div>
         <div id="record-history" class="record-history">아직 저장된 출격 기록이 없습니다.</div>
       </section>
-      <div class="hint">왼쪽 아래 가상 패드를 천천히 밀면 천천히, 끝까지 밀면 빠르게 움직입니다. 이동 범위는 화면 가장자리까지 열려 있습니다.</div>
+      <div class="hint">왼쪽 패드를 누른 뒤 손가락을 움직이세요. 8픽셀 이내는 정지, 이후 이동 거리와 속도가 1:1로 비례하며 손을 떼면 즉시 멈춥니다.</div>
     </div>
   </div>
   <div id="result" class="overlay hidden">
@@ -147,7 +147,7 @@
   <button id="btn-bomb" class="touch-button" type="button" aria-label="폭탄 사용"><small>폭탄</small><strong>2</strong></button>
   <div id="move-pad" aria-label="이동 가상 패드">
     <div id="move-knob"></div>
-    <span id="move-label">MOVE</span>
+    <span id="move-label">이동</span>
   </div>
   <div id="touch-guide" class="hidden">
     <b>이동</b> 왼쪽 가상 패드<br>
@@ -182,10 +182,10 @@
     autoFire:true,
     maxPlayerBullets:180,
     maxEnemyBullets:260,
-    playerSpeedX:238,
-    playerSpeedY:265,
-    padDeadzone:.11,
-    padExponent:1.12
+    playerSpeedX:205,
+    playerSpeedY:225,
+    padDeadzonePx:8,
+    padMaxRadiusPx:38
   };
   const MISSILE_TYPES={
     vulcan:{name:"기본 발칸",short:"발",color:C.yellow,description:"직선 기본탄"},
@@ -205,6 +205,8 @@
     keys:new Set(),
     padActive:false,
     padPointerId:null,
+    padOriginX:0,
+    padOriginY:0,
     axisX:0,
     axisY:0,
     missilePressed:false,
@@ -233,28 +235,25 @@
   }
 
   function updatePadFromPointer(e){
-    const rect=movePad.getBoundingClientRect();
-    const cx=rect.left+rect.width/2;
-    const cy=rect.top+rect.height/2;
-    const dx=e.clientX-cx;
-    const dy=e.clientY-cy;
+    const dx=e.clientX-input.padOriginX;
+    const dy=e.clientY-input.padOriginY;
     const distance=Math.hypot(dx,dy);
-    const maxRadius=rect.width*.31;
-    const clamped=Math.min(maxRadius,distance);
-    const dirX=distance>0?dx/distance:0;
-    const dirY=distance>0?dy/distance:0;
+    const deadzone=config.padDeadzonePx;
+    const maxRadius=config.padMaxRadiusPx;
 
-    moveKnob.style.transform=`translate(${dirX*clamped}px,${dirY*clamped}px)`;
-
-    const normalized=maxRadius>0?clamped/maxRadius:0;
-    if(normalized<=config.padDeadzone){
+    if(distance<=deadzone){
       input.axisX=0;
       input.axisY=0;
+      moveKnob.style.transform="translate(0px,0px)";
       return
     }
 
-    const scaled=(normalized-config.padDeadzone)/(1-config.padDeadzone);
-    const strength=Math.pow(clamp(scaled,0,1),config.padExponent);
+    const dirX=dx/distance;
+    const dirY=dy/distance;
+    const visualRadius=Math.min(maxRadius,distance);
+    moveKnob.style.transform=`translate(${dirX*visualRadius}px,${dirY*visualRadius}px)`;
+
+    const strength=clamp((distance-deadzone)/(maxRadius-deadzone),0,1);
     input.axisX=dirX*strength;
     input.axisY=dirY*strength
   }
@@ -263,11 +262,17 @@
     if(state.mode!=="playing"||input.padActive)return;
     e.preventDefault();
     e.stopPropagation();
+
     input.padActive=true;
     input.padPointerId=e.pointerId;
+    input.padOriginX=e.clientX;
+    input.padOriginY=e.clientY;
+    input.axisX=0;
+    input.axisY=0;
+
     movePad.classList.add("active");
+    moveKnob.style.transform="translate(0px,0px)";
     movePad.setPointerCapture(e.pointerId);
-    updatePadFromPointer(e);
     touchGuide.classList.add("hidden")
   });
 
@@ -565,7 +570,7 @@
     player.y+=dy*config.playerSpeedY*dt;
     player.x=clamp(player.x,MOVE_BOUNDS.minX,MOVE_BOUNDS.maxX);
     player.y=clamp(player.y,MOVE_BOUNDS.minY,MOVE_BOUNDS.maxY);
-    player.tilt=lerp(player.tilt,dy,.2);
+    player.tilt=lerp(player.tilt,dy,.18);
 
     if(player.invuln>0)player.invuln-=dt;
     player.trail.push({x:player.x-13,y:player.y,age:0});
@@ -1902,10 +1907,10 @@
       return {
         speedX:config.playerSpeedX,
         speedY:config.playerSpeedY,
-        radius:config.stickRadius,
-        deadzone:config.stickDeadzone,
+        deadzonePx:config.padDeadzonePx,
+        maxRadiusPx:config.padMaxRadiusPx,
         bounds:MOVE_BOUNDS,
-        fullScreen:MOVE_BOUNDS.maxX===W-16
+        control:"standard-relative-pad"
       }
     },
     getEnemyBulletCount(){return eBullets.length},

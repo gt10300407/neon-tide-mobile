@@ -1,7 +1,7 @@
 {
   "name": "네온 타이드 모바일",
   "short_name": "네온 타이드",
-  "description": "고정 가상 패드와 주무기별 특수탄을 적용한 모바일 슈팅 게임",
+  "description": "표준 상대형 가상 패드를 적용한 모바일 횡스크롤 슈팅 게임",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
