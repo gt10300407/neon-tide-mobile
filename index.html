@@ -9,7 +9,7 @@
 <meta name="apple-mobile-web-app-title" content="NEON TIDE">
 <link rel="manifest" href="./manifest.webmanifest">
 <link rel="apple-touch-icon" href="./icon-192.png">
-<title>네온 타이드 V3.9 · 표준 가상 패드</title>
+<title>네온 타이드 V4.0 · 상대 드래그 조작</title>
 <style>
   :root{--red:#e23725;--amber:#f2a93b;--cream:#f3ead2;--blue:#2f6fc8;--panel:#05070c}
   *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
@@ -38,69 +38,14 @@
   .touch-button strong{font-size:12px;letter-spacing:.03em}
   .touch-button small{font-size:7px;opacity:.86}
   .touch-button:active{transform:scale(.94);background:rgba(255,255,255,.14)}
-  #btn-missile{right:calc(78px + env(safe-area-inset-right));bottom:calc(12px + env(safe-area-inset-bottom));width:68px;height:68px;border:3px solid #4c8fd9;color:#99c9ff}
-  #btn-bomb{right:calc(8px + env(safe-area-inset-right));bottom:calc(7px + env(safe-area-inset-bottom));width:68px;height:68px;border:3px solid #d78b24;color:#ffd178}
+  #btn-missile{right:calc(68px + env(safe-area-inset-right));bottom:calc(9px + env(safe-area-inset-bottom));width:58px;height:58px;border:3px solid #4c8fd9;color:#99c9ff}
+  #btn-bomb{right:calc(7px + env(safe-area-inset-right));bottom:calc(6px + env(safe-area-inset-bottom));width:60px;height:60px;border:3px solid #d78b24;color:#ffd178}
   #btn-pause{right:calc(7px + env(safe-area-inset-right));top:calc(7px + env(safe-area-inset-top));width:38px;height:32px;border:1px solid #ddd;border-radius:3px}
   #btn-sound{left:calc(7px + env(safe-area-inset-left));top:calc(7px + env(safe-area-inset-top));width:38px;height:32px;border:1px solid #ddd;border-radius:3px}
 
-  #move-pad{
-    position:absolute;
-    left:calc(12px + env(safe-area-inset-left));
-    bottom:calc(12px + env(safe-area-inset-bottom));
-    z-index:15;
-    width:104px;
-    height:104px;
-    border-radius:50%;
-    border:2px solid rgba(190,220,255,.72);
-    background:
-      radial-gradient(circle at center,rgba(80,135,190,.12) 0 24%,rgba(5,12,24,.58) 25% 67%,rgba(0,0,0,.68) 68%);
-    box-shadow:inset 0 0 0 1px rgba(255,255,255,.12);
-    touch-action:none;
-  }
-  #move-pad::before,#move-pad::after{
-    content:"";
-    position:absolute;
-    left:50%;
-    top:50%;
-    background:rgba(150,205,255,.28);
-    transform:translate(-50%,-50%);
-    pointer-events:none;
-  }
-  #move-pad::before{width:74%;height:1px}
-  #move-pad::after{width:1px;height:74%}
-  #move-pad.active{border-color:#8edcff;background-color:rgba(15,45,74,.42)}
-  #move-knob{
-    position:absolute;
-    left:50%;
-    top:50%;
-    width:42px;
-    height:42px;
-    margin:-21px 0 0 -21px;
-    border-radius:50%;
-    border:2px solid #8edcff;
-    background:rgba(9,28,48,.92);
-    box-shadow:inset 0 0 0 7px rgba(121,216,255,.12);
-    transform:translate(0,0);
-    pointer-events:none;
-    will-change:transform;
-  }
-  #move-label{
-    position:absolute;
-    left:50%;
-    bottom:4px;
-    transform:translateX(-50%);
-    color:rgba(220,240,255,.72);
-    font-size:7px;
-    font-weight:700;
-    pointer-events:none;
-  }
-  @media (max-height:430px){
-    #move-pad{width:92px;height:92px}
-    #move-knob{width:38px;height:38px;margin:-19px 0 0 -19px}
-  }
 
   #rotate-note{position:absolute;inset:0;z-index:40;display:none;place-items:center;background:#000;color:#fff;text-align:center;padding:24px}
-  #touch-guide{position:absolute;left:126px;bottom:12px;z-index:13;max-width:205px;padding:8px 10px;border:1px solid #6d7785;background:rgba(0,0,0,.78);color:#f3ead2;font-size:9px;line-height:1.45;pointer-events:none}
+  #touch-guide{position:absolute;left:10px;bottom:10px;z-index:13;max-width:205px;padding:8px 10px;border:1px solid #6d7785;background:rgba(0,0,0,.78);color:#f3ead2;font-size:9px;line-height:1.45;pointer-events:none}
   #touch-guide.hidden{display:none}
   #touch-guide b{color:#79d8ff}
   @media (pointer:fine){.touch-button{opacity:.78}}
@@ -113,8 +58,8 @@
   <div id="menu" class="overlay">
     <div>
       <h1 class="title">NEON TIDE</h1>
-      <div class="subtitle">모바일 캠페인 · 표준 가상 패드 · 주무기별 특수탄</div>
-      <p class="copy">왼쪽 패드는 손가락을 누른 위치를 기준점으로 사용합니다. 누르는 순간에는 움직이지 않고, 움직인 거리만큼 정확히 비례해 기체가 이동합니다.</p>
+      <div class="subtitle">모바일 캠페인 · 상대 드래그 조작 · 회피 공간 개선</div>
+      <p class="copy">가상 패드를 제거했습니다. 화면을 누른 뒤 손가락을 움직인 거리만큼 기체가 직접 따라오며, 손가락이 멈추면 기체도 즉시 멈춥니다.</p>
       <button id="start-button" class="main-button" type="button">캠페인 시작 · 1단계</button>
       <section class="record-panel" aria-label="누적 캠페인 기록">
         <div class="record-grid">
@@ -129,7 +74,7 @@
         </div>
         <div id="record-history" class="record-history">아직 저장된 출격 기록이 없습니다.</div>
       </section>
-      <div class="hint">왼쪽 패드를 누른 뒤 손가락을 움직이세요. 8픽셀 이내는 정지, 이후 이동 거리와 속도가 1:1로 비례하며 손을 떼면 즉시 멈춥니다.</div>
+      <div class="hint">게임 화면 빈 곳을 누르고 드래그하세요. 손가락 이동량의 82%만큼 기체가 이동하고, 관성·가속·최소 속도는 없습니다.</div>
     </div>
   </div>
   <div id="result" class="overlay hidden">
@@ -145,12 +90,8 @@
   <button id="btn-pause" class="touch-button" type="button" aria-label="일시정지"><strong>Ⅱ</strong></button>
   <button id="btn-missile" class="touch-button" type="button" aria-label="특수 유도탄 사용"><small>특수탄</small><strong>6</strong></button>
   <button id="btn-bomb" class="touch-button" type="button" aria-label="폭탄 사용"><small>폭탄</small><strong>2</strong></button>
-  <div id="move-pad" aria-label="이동 가상 패드">
-    <div id="move-knob"></div>
-    <span id="move-label">이동</span>
-  </div>
   <div id="touch-guide" class="hidden">
-    <b>이동</b> 왼쪽 가상 패드<br>
+    <b>이동</b> 화면 상대 드래그<br>
     <b>주무기</b> 자동 발사<br>
     <b>무기별 특수탄</b> 파란 버튼<br>
     <b>폭탄</b> 주황 버튼
@@ -175,7 +116,7 @@
     time:document.getElementById("record-time"),
     history:document.getElementById("record-history")
   };
-  const btnMissile=document.getElementById("btn-missile"),btnBomb=document.getElementById("btn-bomb"),btnPause=document.getElementById("btn-pause"),btnSound=document.getElementById("btn-sound"),touchGuide=document.getElementById("touch-guide"),movePad=document.getElementById("move-pad"),moveKnob=document.getElementById("move-knob");
+  const btnMissile=document.getElementById("btn-missile"),btnBomb=document.getElementById("btn-bomb"),btnPause=document.getElementById("btn-pause"),btnSound=document.getElementById("btn-sound"),touchGuide=document.getElementById("touch-guide");
   const C={black:"#000",deep:"#02050d",navy:"#07152f",blue:"#0e3274",sky:"#2967bf",cloudDark:"#7395c9",cloud:"#c7d9f1",white:"#f4ecd7",steel:"#a8afbb",steel2:"#646b75",red:"#df3522",red2:"#7c150d",orange:"#f07a19",yellow:"#f4d45b",green:"#6b9e35",green2:"#2d4c1d",cyan:"#79d8ff",purple:"#7357a7",flesh:"#a4483e",ink:"#141721",acid:"#9ecb3b",acidDark:"#284723",violet:"#69498c"};
   const MOVE_BOUNDS={minX:14,maxX:W-14,minY:17,maxY:H-17};
   const config={
@@ -184,8 +125,8 @@
     maxEnemyBullets:260,
     playerSpeedX:205,
     playerSpeedY:225,
-    padDeadzonePx:8,
-    padMaxRadiusPx:38
+    dragScale:.82,
+    dragMaxStep:16
   };
   const MISSILE_TYPES={
     vulcan:{name:"기본 발칸",short:"발",color:C.yellow,description:"직선 기본탄"},
@@ -203,12 +144,10 @@
 
   const input={
     keys:new Set(),
-    padActive:false,
-    padPointerId:null,
-    padOriginX:0,
-    padOriginY:0,
-    axisX:0,
-    axisY:0,
+    dragging:false,
+    dragPointerId:null,
+    lastX:0,
+    lastY:0,
     missilePressed:false,
     bombPressed:false
   };
@@ -224,67 +163,58 @@
   },{passive:false});
   window.addEventListener("keyup",e=>input.keys.delete(e.key.toLowerCase()));
 
-  function resetPad(pointerId=null){
-    if(pointerId!==null&&input.padPointerId!==pointerId)return;
-    input.padActive=false;
-    input.padPointerId=null;
-    input.axisX=0;
-    input.axisY=0;
-    movePad.classList.remove("active");
-    moveKnob.style.transform="translate(0px,0px)"
+  const pointerPos=e=>{
+    const r=canvas.getBoundingClientRect();
+    return {
+      x:(e.clientX-r.left)/r.width*W,
+      y:(e.clientY-r.top)/r.height*H
+    }
+  };
+
+  function resetDrag(pointerId=null){
+    if(pointerId!==null&&input.dragPointerId!==pointerId)return;
+    input.dragging=false;
+    input.dragPointerId=null
   }
 
-  function updatePadFromPointer(e){
-    const dx=e.clientX-input.padOriginX;
-    const dy=e.clientY-input.padOriginY;
-    const distance=Math.hypot(dx,dy);
-    const deadzone=config.padDeadzonePx;
-    const maxRadius=config.padMaxRadiusPx;
+  canvas.addEventListener("pointerdown",e=>{
+    if(state.mode!=="playing"||input.dragging)return;
+    e.preventDefault();
+    const p=pointerPos(e);
+    input.dragging=true;
+    input.dragPointerId=e.pointerId;
+    input.lastX=p.x;
+    input.lastY=p.y;
+    canvas.setPointerCapture(e.pointerId)
+  });
 
-    if(distance<=deadzone){
-      input.axisX=0;
-      input.axisY=0;
-      moveKnob.style.transform="translate(0px,0px)";
-      return
+  canvas.addEventListener("pointermove",e=>{
+    if(!input.dragging||input.dragPointerId!==e.pointerId||state.mode!=="playing")return;
+    e.preventDefault();
+    touchGuide.classList.add("hidden");
+
+    const p=pointerPos(e);
+    let dx=p.x-input.lastX;
+    let dy=p.y-input.lastY;
+    const distance=Math.hypot(dx,dy);
+
+    if(distance>config.dragMaxStep){
+      const scale=config.dragMaxStep/distance;
+      dx*=scale;
+      dy*=scale
     }
 
-    const dirX=dx/distance;
-    const dirY=dy/distance;
-    const visualRadius=Math.min(maxRadius,distance);
-    moveKnob.style.transform=`translate(${dirX*visualRadius}px,${dirY*visualRadius}px)`;
+    player.x=clamp(player.x+dx*config.dragScale,MOVE_BOUNDS.minX,MOVE_BOUNDS.maxX);
+    player.y=clamp(player.y+dy*config.dragScale,MOVE_BOUNDS.minY,MOVE_BOUNDS.maxY);
+    player.tilt=lerp(player.tilt,clamp(dy/8,-1,1),.32);
 
-    const strength=clamp((distance-deadzone)/(maxRadius-deadzone),0,1);
-    input.axisX=dirX*strength;
-    input.axisY=dirY*strength
-  }
-
-  movePad.addEventListener("pointerdown",e=>{
-    if(state.mode!=="playing"||input.padActive)return;
-    e.preventDefault();
-    e.stopPropagation();
-
-    input.padActive=true;
-    input.padPointerId=e.pointerId;
-    input.padOriginX=e.clientX;
-    input.padOriginY=e.clientY;
-    input.axisX=0;
-    input.axisY=0;
-
-    movePad.classList.add("active");
-    moveKnob.style.transform="translate(0px,0px)";
-    movePad.setPointerCapture(e.pointerId);
-    touchGuide.classList.add("hidden")
+    input.lastX=p.x;
+    input.lastY=p.y
   });
 
-  movePad.addEventListener("pointermove",e=>{
-    if(!input.padActive||input.padPointerId!==e.pointerId)return;
-    e.preventDefault();
-    updatePadFromPointer(e)
-  });
-
-  movePad.addEventListener("pointerup",e=>resetPad(e.pointerId));
-  movePad.addEventListener("pointercancel",e=>resetPad(e.pointerId));
-  movePad.addEventListener("lostpointercapture",e=>resetPad(e.pointerId));
+  canvas.addEventListener("pointerup",e=>resetDrag(e.pointerId));
+  canvas.addEventListener("pointercancel",e=>resetDrag(e.pointerId));
+  canvas.addEventListener("lostpointercapture",e=>resetDrag(e.pointerId));
 
   const STAGES=[
     {id:1,name:"푸른 대기권",boss:"bio",duration:66,bossAt:62,bg:"blue",events:[
@@ -372,7 +302,7 @@
   const bg={starsFar:[],starsNear:[],cloudsFar:[],cloudsNear:[],rocks:[],debris:[],bubbles:[],planet:{x:385,y:68,r:30},scroll:0};
 
   function resetArrays(){enemies.length=0;pBullets.length=0;eBullets.length=0;missiles.length=0;effects.length=0;pickups.length=0;scoreTexts.length=0;hazards.length=0;boss=null}
-  function resetCampaign(){Object.assign(state,{mode:"playing",time:0,stageTime:0,score:0,stage:1,startStage:1,eventIndex:0,shake:0,flash:0,hitstop:0,message:"",messageTimer:0,combo:0,maxCombo:0,comboTimer:0,multiplier:1,kills:0,bossParts:0,clearTimer:0,transitionTimer:0,bossSpawned:false,hazardPulse:0,recordSaved:false});Object.assign(player,{x:78,y:H/2,lives:5,weapon:1,missiles:6,missileType:"vulcan",bombs:2,fireCd:0,missileCd:0,invuln:2,respawn:0,alive:true,tilt:0});player.trail.length=0;resetPad();resetArrays();initBackground();updateMissileButton();updateBombButton()}
+  function resetCampaign(){Object.assign(state,{mode:"playing",time:0,stageTime:0,score:0,stage:1,startStage:1,eventIndex:0,shake:0,flash:0,hitstop:0,message:"",messageTimer:0,combo:0,maxCombo:0,comboTimer:0,multiplier:1,kills:0,bossParts:0,clearTimer:0,transitionTimer:0,bossSpawned:false,hazardPulse:0,recordSaved:false});Object.assign(player,{x:78,y:H/2,lives:5,weapon:1,missiles:6,missileType:"vulcan",bombs:2,fireCd:0,missileCd:0,invuln:2,respawn:0,alive:true,tilt:0});player.trail.length=0;resetDrag();resetArrays();initBackground();updateMissileButton();updateBombButton()}
   function showTouchGuide(){
     touchGuide.classList.remove("hidden");
     clearTimeout(showTouchGuide.timer);
@@ -557,7 +487,7 @@
       return
     }
 
-    let dx=input.axisX,dy=input.axisY;
+    let dx=0,dy=0;
     if(input.keys.has("arrowleft")||input.keys.has("a"))dx-=1;
     if(input.keys.has("arrowright")||input.keys.has("d"))dx+=1;
     if(input.keys.has("arrowup")||input.keys.has("w"))dy-=1;
@@ -566,11 +496,15 @@
     const magnitude=Math.hypot(dx,dy);
     if(magnitude>1){dx/=magnitude;dy/=magnitude}
 
-    player.x+=dx*config.playerSpeedX*dt;
-    player.y+=dy*config.playerSpeedY*dt;
-    player.x=clamp(player.x,MOVE_BOUNDS.minX,MOVE_BOUNDS.maxX);
-    player.y=clamp(player.y,MOVE_BOUNDS.minY,MOVE_BOUNDS.maxY);
-    player.tilt=lerp(player.tilt,dy,.18);
+    if(dx||dy){
+      player.x+=dx*config.playerSpeedX*dt;
+      player.y+=dy*config.playerSpeedY*dt;
+      player.x=clamp(player.x,MOVE_BOUNDS.minX,MOVE_BOUNDS.maxX);
+      player.y=clamp(player.y,MOVE_BOUNDS.minY,MOVE_BOUNDS.maxY);
+      player.tilt=lerp(player.tilt,dy,.18)
+    }else{
+      player.tilt=lerp(player.tilt,0,.12)
+    }
 
     if(player.invuln>0)player.invuln-=dt;
     player.trail.push({x:player.x-13,y:player.y,age:0});
@@ -885,11 +819,11 @@
     }
   }
   function shootEnemy(e){
-    const cap=state.stage===1?46:config.maxEnemyBullets;
+    const cap=state.stage===1?30:config.maxEnemyBullets;
     if(eBullets.length>=cap||!player.alive)return;
 
     const a=Math.atan2(player.y-e.y,player.x-e.x);
-    const spd=state.stage===1?82:105+(state.stage-1)*12;
+    const spd=state.stage===1?74:105+(state.stage-1)*12;
 
     if(e.type==="carrier"||e.type==="guardian"||e.type==="rail"){
       const n=state.stage===1?(e.type==="guardian"?3:2):(e.type==="guardian"?5:3);
@@ -991,6 +925,7 @@
       fire:.9,
       laser:0,
       laserWarn:0,
+      missileCooldown:0,
       special:state.stage===1?5.5:1.4,
       grace:state.stage===1?4.0:1.2,
       dead:false,
@@ -1046,6 +981,7 @@
 
     boss.age+=dt;
     boss.grace=Math.max(0,boss.grace-dt);
+    boss.missileCooldown=Math.max(0,boss.missileCooldown-dt);
     boss.hpFlash=Math.max(0,boss.hpFlash-dt);
     boss.x=lerp(boss.x,boss.targetX,Math.min(1,dt*1.1));
     boss.y=H/2+Math.sin(boss.age*(boss.type==="leviathan"?.8:.55))*(state.stage===1?25:34);
@@ -1092,12 +1028,12 @@
     if(boss.hp===0&&!boss.dead)destroyBoss()
   }
   function bossPartAttack(p){
-    if(state.stage===1&&eBullets.length>=22)return;
+    if(state.stage===1&&eBullets.length>=14)return;
 
     const sx=boss.x+p.ox-p.w/2;
     const sy=boss.y+p.oy;
     const a=Math.atan2(player.y-sy,player.x-sx);
-    const spd=state.stage===1?76:120+(state.stage-1)*11;
+    const spd=state.stage===1?68:120+(state.stage-1)*11;
     const n=state.stage===1?(boss.phase>=3?2:1):(boss.phase>=3?5:3);
 
     for(let i=0;i<n;i++){
@@ -1116,11 +1052,21 @@
   function bossSpecial(){
     if(boss.type==="bio"){
       if(state.stage===1){
+        const liveMissiles=eBullets.filter(b=>b.kind==="missile"||b.kind==="missileWarning").length;
+
         if(boss.phase>=3){
-          boss.laserWarn=1.25;
-          audio.warning()
-        }else{
-          spawnBossMissiles(boss.phase===1?1:2)
+          if(liveMissiles===0&&boss.laser<=0&&boss.laserWarn<=0){
+            boss.laserWarn=1.25;
+            audio.warning()
+          }
+        }else if(
+          boss.missileCooldown<=0&&
+          liveMissiles<2&&
+          boss.laser<=0&&
+          boss.laserWarn<=0
+        ){
+          spawnBossMissiles(Math.min(2-liveMissiles,boss.phase===1?1:2));
+          boss.missileCooldown=3.2
         }
       }else if(boss.phase>=2){
         boss.laserWarn=.65;
@@ -1164,24 +1110,49 @@
     }
   }
   function spawnBossMissiles(n){
-    const cap=state.stage===1?22:config.maxEnemyBullets;
-    if(eBullets.length>=cap)return;
+    const cap=state.stage===1?14:config.maxEnemyBullets;
+    if(eBullets.length>=cap||n<=0)return;
+    if(state.stage===1&&(boss.laser>0||boss.laserWarn>0))return;
 
-    const speed=state.stage===1?68:95;
-    const homing=state.stage===1?.65:1.8;
+    const existing=eBullets.filter(b=>b.kind==="missile"||b.kind==="missileWarning").length;
+    const allowed=state.stage===1?Math.max(0,2-existing):n;
+    const count=Math.min(n,allowed);
+    if(count<=0)return;
+
+    const speed=state.stage===1?56:95;
+    const homing=state.stage===1?.5:1.8;
     const radius=state.stage===1?3:4;
 
-    for(let i=0;i<n&&eBullets.length<cap;i++){
-      eBullets.push({
-        x:boss.x-70,
-        y:boss.y+(i-(n-1)/2)*16,
-        vx:-speed,
-        vy:(i-(n-1)/2)*(state.stage===1?9:13),
-        r:radius,
-        kind:"missile",
-        homing,
-        dead:false
-      })
+    for(let i=0;i<count&&eBullets.length<cap;i++){
+      const laneOffset=(i-(count-1)/2)*(state.stage===1?34:16);
+      const y=clamp(boss.y+laneOffset,35,H-35);
+
+      if(state.stage===1){
+        eBullets.push({
+          x:boss.x-70,
+          y,
+          vx:0,
+          vy:0,
+          r:radius,
+          kind:"missileWarning",
+          warn:.72,
+          launchSpeed:speed,
+          launchVy:(i-(count-1)/2)*7,
+          launchHoming:homing,
+          dead:false
+        })
+      }else{
+        eBullets.push({
+          x:boss.x-70,
+          y,
+          vx:-speed,
+          vy:(i-(count-1)/2)*13,
+          r:radius,
+          kind:"missile",
+          homing,
+          dead:false
+        })
+      }
     }
   }
   function destroyBossPart(p){p.hp=0;p.destroyed=true;state.bossParts++;state.score+=2500*state.stage;state.hitstop=.08;addExplosion(boss.x+p.ox,boss.y+p.oy,1.5,true);state.message=`${p.name} 파괴`;state.messageTimer=1}
@@ -1431,12 +1402,27 @@
     }
 
     for(const b of eBullets){
+      if(b.kind==="missileWarning"){
+        b.warn-=dt;
+        if(b.warn<=0){
+          b.kind="missile";
+          b.vx=-b.launchSpeed;
+          b.vy=b.launchVy;
+          b.homing=b.launchHoming;
+          audio.warning()
+        }
+        continue
+      }
+
       if(b.kind==="missile"&&b.homing>0&&player.alive){
         b.homing-=dt;
         const a=Math.atan2(player.y-b.y,player.x-b.x);
-        b.vx=lerp(b.vx,Math.cos(a)*105,.025);
-        b.vy=lerp(b.vy,Math.sin(a)*105,.025)
+        const targetSpeed=state.stage===1?68:105;
+        const follow=state.stage===1?.018:.025;
+        b.vx=lerp(b.vx,Math.cos(a)*targetSpeed,follow);
+        b.vy=lerp(b.vy,Math.sin(a)*targetSpeed,follow)
       }
+
       b.x+=b.vx*dt;
       b.y+=b.vy*dt
     }
@@ -1579,7 +1565,13 @@
     }
 
     for(const b of eBullets){
-      if(b.kind==="missile"){
+      if(b.kind==="missileWarning"){
+        const pulse=3+((Math.sin((b.warn||0)*28)+1)*2);
+        ctx.strokeStyle=C.red;
+        ctx.strokeRect((b.x-pulse)|0,(b.y-pulse)|0,pulse*2,pulse*2);
+        ctx.fillStyle=C.yellow;
+        ctx.fillRect((b.x-1)|0,(b.y-1)|0,2,2)
+      }else if(b.kind==="missile"){
         ctx.fillStyle=C.green;
         ctx.fillRect((b.x-5)|0,(b.y-2)|0,9,4);
         ctx.fillStyle=C.orange;
@@ -1704,7 +1696,8 @@
 
     if(player.alive&&player.invuln<=0){
       for(const b of eBullets){
-        if(circleHit(b,player,b.r+5.2)){
+        if(b.kind==="missileWarning")continue;
+        if(circleHit(b,player,b.r+2)){
           b.dead=true;
           hitPlayer();
           break
