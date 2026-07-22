@@ -1,7 +1,7 @@
 {
-  "name": "NEON TIDE Mobile",
-  "short_name": "NEON TIDE",
-  "description": "5-stage mobile side-scrolling shooter",
+  "name": "네온 타이드 모바일",
+  "short_name": "네온 타이드",
+  "description": "5스테이지 모바일 횡스크롤 슈팅 게임",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
