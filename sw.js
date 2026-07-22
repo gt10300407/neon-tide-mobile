@@ -1,4 +1,4 @@
-const CACHE = "neon-tide-v3-6-responsive-balance";
+const CACHE = "neon-tide-v3-7-free-move-boss-damage";
 const ASSETS = ["./","./index.html","./manifest.webmanifest","./icon-192.png","./icon-512.png"];
 self.addEventListener("install", event => {
   event.waitUntil(caches.open(CACHE).then(cache => cache.addAll(ASSETS)));

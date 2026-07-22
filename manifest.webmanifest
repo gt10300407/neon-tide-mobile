@@ -1,7 +1,7 @@
 {
   "name": "네온 타이드 모바일",
   "short_name": "네온 타이드",
-  "description": "빠른 아날로그 조작과 완화된 모바일 탄막을 적용한 5스테이지 슈팅 게임",
+  "description": "화면 전체 자유 이동과 통합 보스 에너지 시스템을 적용한 모바일 슈팅 게임",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",

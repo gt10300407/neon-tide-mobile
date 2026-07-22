@@ -9,7 +9,7 @@
 <meta name="apple-mobile-web-app-title" content="NEON TIDE">
 <link rel="manifest" href="./manifest.webmanifest">
 <link rel="apple-touch-icon" href="./icon-192.png">
-<title>네온 타이드 V3.6 · 반응형 조작·보스 밸런스</title>
+<title>네온 타이드 V3.7 · 자유 이동·보스 피해 수정</title>
 <style>
   :root{--red:#e23725;--amber:#f2a93b;--cream:#f3ead2;--blue:#2f6fc8;--panel:#05070c}
   *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
@@ -56,8 +56,8 @@
   <div id="menu" class="overlay">
     <div>
       <h1 class="title">NEON TIDE</h1>
-      <div class="subtitle">모바일 캠페인 · 빠른 아날로그 조작 · 완화된 1단계</div>
-      <p class="copy">짧게 밀어도 즉시 반응하는 보이지 않는 아날로그 스틱을 적용했습니다. 모든 기본 미사일이 보스 부위와 본체 체력을 실제로 깎으며, 1단계 탄막을 크게 완화했습니다.</p>
+      <div class="subtitle">모바일 캠페인 · 화면 전체 자유 이동 · 보스 피해 정상화</div>
+      <p class="copy">기체는 화면 전체를 자유롭게 이동합니다. 자동 기본 미사일·특수 유도탄·폭탄 모두 보스의 하나의 통합 에너지를 직접 감소시킵니다.</p>
       <button id="start-button" class="main-button" type="button">캠페인 시작 · 1단계</button>
       <section class="record-panel" aria-label="누적 캠페인 기록">
         <div class="record-grid">
@@ -72,7 +72,7 @@
         </div>
         <div id="record-history" class="record-history">아직 저장된 출격 기록이 없습니다.</div>
       </section>
-      <div class="hint">휴대폰을 가로로 돌린 뒤 화면 왼쪽을 누른 채 원하는 방향으로 기울이세요. 기본 미사일은 자동 발사되고, 파란 버튼은 별도의 특수 유도탄입니다.</div>
+      <div class="hint">화면 어디든 누른 채 원하는 방향으로 밀면 기체가 즉시 이동합니다. 이동 범위는 화면 가장자리 외에는 제한하지 않습니다.</div>
     </div>
   </div>
   <div id="result" class="overlay hidden">
@@ -89,7 +89,7 @@
   <button id="btn-missile" class="touch-button" type="button" aria-label="특수 유도탄 사용"><small>특수탄</small><strong>6</strong></button>
   <button id="btn-bomb" class="touch-button" type="button" aria-label="폭탄 사용"><small>폭탄</small><strong>2</strong></button>
   <div id="touch-guide" class="hidden">
-    <b>이동</b> 화면 왼쪽에서 8방향 조작<br>
+    <b>이동</b> 화면 전체에서 8방향 조작<br>
     <b>기본 미사일</b> 자동 발사<br>
     <b>특수 유도탄</b> 파란 버튼<br>
     <b>폭탄</b> 주황 버튼
@@ -116,15 +116,15 @@
   };
   const btnMissile=document.getElementById("btn-missile"),btnBomb=document.getElementById("btn-bomb"),btnPause=document.getElementById("btn-pause"),btnSound=document.getElementById("btn-sound"),touchGuide=document.getElementById("touch-guide");
   const C={black:"#000",deep:"#02050d",navy:"#07152f",blue:"#0e3274",sky:"#2967bf",cloudDark:"#7395c9",cloud:"#c7d9f1",white:"#f4ecd7",steel:"#a8afbb",steel2:"#646b75",red:"#df3522",red2:"#7c150d",orange:"#f07a19",yellow:"#f4d45b",green:"#6b9e35",green2:"#2d4c1d",cyan:"#79d8ff",purple:"#7357a7",flesh:"#a4483e",ink:"#141721",acid:"#9ecb3b",acidDark:"#284723",violet:"#69498c"};
-  const MOVE_BOUNDS={minX:26,maxX:W*.52,minY:24,maxY:H-24};
+  const MOVE_BOUNDS={minX:16,maxX:W-16,minY:18,maxY:H-18};
   const config={
     autoFire:true,
     maxPlayerBullets:180,
     maxEnemyBullets:260,
-    playerSpeedX:258,
-    playerSpeedY:312,
-    stickRadius:30,
-    stickDeadzone:2
+    playerSpeedX:430,
+    playerSpeedY:460,
+    stickRadius:18,
+    stickDeadzone:0
   };
   const MISSILE_TYPES={
     search:{name:"추적 미사일",short:"추",color:C.cyan,description:"여러 표적 자동 추적"},
@@ -165,7 +165,6 @@
   canvas.addEventListener("pointerdown",e=>{
     if(state.mode!=="playing"||input.stickActive)return;
     const p=pointerPos(e);
-    if(p.x>W*.66)return;
     input.stickActive=true;
     input.pointerId=e.pointerId;
     input.originX=p.x;
@@ -185,14 +184,13 @@
     const rawX=p.x-input.originX;
     const rawY=p.y-input.originY;
     const length=Math.hypot(rawX,rawY);
-    if(length<=config.stickDeadzone){
+    if(length<.5){
       input.axisX=0;
       input.axisY=0;
       return
     }
-    const clamped=Math.min(config.stickRadius,length);
-    const normalized=(clamped-config.stickDeadzone)/(config.stickRadius-config.stickDeadzone);
-    const strength=Math.min(1,.24+.76*Math.sqrt(Math.max(0,normalized)));
+    const normalized=Math.min(1,length/config.stickRadius);
+    const strength=Math.min(1,.55+.45*normalized);
     input.axisX=(rawX/length)*strength;
     input.axisY=(rawY/length)*strength
   });
@@ -483,7 +481,7 @@
     player.y+=dy*config.playerSpeedY*dt;
     player.x=clamp(player.x,MOVE_BOUNDS.minX,MOVE_BOUNDS.maxX);
     player.y=clamp(player.y,MOVE_BOUNDS.minY,MOVE_BOUNDS.maxY);
-    player.tilt=lerp(player.tilt,dy,.16);
+    player.tilt=lerp(player.tilt,dy,.32);
 
     if(player.invuln>0)player.invuln-=dt;
     player.trail.push({x:player.x-13,y:player.y,age:0});
@@ -647,11 +645,17 @@
     state.shake=11;
     state.hitstop=.08;
     eBullets.length=0;
+
     for(const e of enemies)e.hp-=18;
+
     if(boss){
-      for(const p of boss.parts)if(!p.destroyed)p.hp-=12;
-      boss.coreHp-=20
+      applyBossDamage(34+player.weapon*4,boss.x-30,boss.y);
+      for(const p of boss.parts){
+        if(!p.destroyed)p.hp-=8
+      }
+      boss.coreHp=Math.max(0,boss.coreHp-10)
     }
+
     effects.push({type:"shockwave",x:player.x,y:player.y,age:0,duration:.8,size:1});
     addExplosion(player.x,player.y,1.4,true)
   }
@@ -772,12 +776,18 @@
     sovereign:{name:"붉은 지배자",targetX:382,w:205,h:205,core:420,parts:[[-60,-60,42,34,96,"왕관 포대"],[-60,60,42,34,96,"턱 포대"],[4,-78,52,28,112,"미사일 왕관"],[15,72,52,28,112,"중력 장치"]]}
   };
   function bossTotalMax(){
-    if(!boss)return 1;
-    return boss.coreMax+boss.parts.reduce((sum,p)=>sum+p.maxHp,0)
+    return boss?boss.maxHp:1
   }
   function bossTotalHp(){
-    if(!boss)return 0;
-    return Math.max(0,boss.coreHp)+boss.parts.reduce((sum,p)=>sum+Math.max(0,p.hp),0)
+    return boss?Math.max(0,boss.hp):0
+  }
+  function applyBossDamage(amount,x=boss?.x,y=boss?.y){
+    if(!boss||boss.dead||amount<=0)return 0;
+    const before=boss.hp;
+    boss.hp=Math.max(0,boss.hp-amount);
+    boss.hpFlash=.12;
+    if(Number.isFinite(x)&&Number.isFinite(y))addHit(x,y);
+    return before-boss.hp
   }
   function bossHealthSnapshot(){
     if(!boss)return null;
@@ -788,8 +798,48 @@
       parts:boss.parts.map(p=>({name:p.name,hp:p.hp,max:p.maxHp,destroyed:p.destroyed}))
     }
   }
-  function spawnBoss(){const d=BOSS_DATA[currentStage().boss];state.bossSpawned=true;state.message="경고";state.messageTimer=2.4;audio.warning();boss={type:currentStage().boss,name:d.name,x:W+120,y:H/2,w:d.w,h:d.h,age:0,targetX:d.targetX,coreHp:d.core,coreMax:d.core,phase:1,fire:.9,laser:0,laserWarn:0,special:state.stage===1?5.5:1.4,grace:state.stage===1?4.0:1.2,dead:false,dying:0,explosionTick:0,parts:d.parts.map((p,i)=>({id:`p${i}`,ox:p[0],oy:p[1],w:p[2],h:p[3],hp:p[4],maxHp:p[4],name:p[5],destroyed:false,fire:rand(.55,1.1)}))}}
-  function updateBoss(dt){if(!boss)return;if(boss.dying>0){boss.dying-=dt;boss.explosionTick-=dt;if(boss.explosionTick<=0){boss.explosionTick=.11;addExplosion(boss.x+rand(-80,55),boss.y+rand(-80,80),rand(.8,1.8),true)}if(boss.dying<=0){boss=null;state.mode="stageclear";state.clearTimer=2.7;state.message=`${state.stage}단계 완료`;state.messageTimer=2.7;eBullets.length=0;hazards.length=0}return}boss.age+=dt;boss.grace=Math.max(0,boss.grace-dt);boss.x=lerp(boss.x,boss.targetX,Math.min(1,dt*1.1));boss.y=H/2+Math.sin(boss.age*(boss.type==="leviathan"?.8:.55))*(state.stage===1?25:34);const n=boss.parts.filter(p=>!p.destroyed).length;boss.phase=boss.type==="sovereign"?(n>=3?1:n>=2?2:n>=1?3:4):(n>=2?1:n===1?2:3);for(const p of boss.parts){if(p.destroyed)continue;if(boss.grace>0)continue;p.fire-=dt;if(p.fire<=0){bossPartAttack(p);p.fire=state.stage===1?rand(2.15,2.75):rand(Math.max(.38,.82-state.stage*.06),Math.max(.6,1.15-state.stage*.05))}if(p.hp<=0)destroyBossPart(p)}if(boss.grace<=0)boss.special-=dt;if(boss.special<=0){boss.special=state.stage===1?(boss.phase>=3?4.8:5.8):boss.type==="sovereign"?1.15:boss.phase>=2?1.8:2.5;bossSpecial()}if(boss.laserWarn>0){boss.laserWarn-=dt;if(boss.laserWarn<=0){boss.laser=state.stage===1?.42:.65;state.shake=state.stage===1?4:7;audio.tone(85,.5,"sawtooth",.055,20)}}if(boss.laser>0)boss.laser-=dt;if(boss.coreHp<=0&&!boss.dead)destroyBoss()}
+  function spawnBoss(){
+    const d=BOSS_DATA[currentStage().boss];
+    const maxHp=d.core+d.parts.reduce((sum,p)=>sum+p[4],0);
+    state.bossSpawned=true;
+    state.message="경고";
+    state.messageTimer=2.4;
+    audio.warning();
+
+    boss={
+      type:currentStage().boss,
+      name:d.name,
+      x:W+120,
+      y:H/2,
+      w:d.w,
+      h:d.h,
+      age:0,
+      targetX:d.targetX,
+      hp:maxHp,
+      maxHp,
+      hpFlash:0,
+      coreHp:d.core,
+      coreMax:d.core,
+      phase:1,
+      fire:.9,
+      laser:0,
+      laserWarn:0,
+      special:state.stage===1?5.5:1.4,
+      grace:state.stage===1?4.0:1.2,
+      dead:false,
+      dying:0,
+      explosionTick:0,
+      parts:d.parts.map((p,i)=>({
+        id:`p${i}`,
+        ox:p[0],oy:p[1],w:p[2],h:p[3],
+        hp:p[4],maxHp:p[4],
+        name:p[5],
+        destroyed:false,
+        fire:rand(.55,1.1)
+      }))
+    }
+  }
+  function updateBoss(dt){if(!boss)return;if(boss.dying>0){boss.dying-=dt;boss.explosionTick-=dt;if(boss.explosionTick<=0){boss.explosionTick=.11;addExplosion(boss.x+rand(-80,55),boss.y+rand(-80,80),rand(.8,1.8),true)}if(boss.dying<=0){boss=null;state.mode="stageclear";state.clearTimer=2.7;state.message=`${state.stage}단계 완료`;state.messageTimer=2.7;eBullets.length=0;hazards.length=0}return}boss.age+=dt;boss.grace=Math.max(0,boss.grace-dt);boss.hpFlash=Math.max(0,boss.hpFlash-dt);boss.x=lerp(boss.x,boss.targetX,Math.min(1,dt*1.1));boss.y=H/2+Math.sin(boss.age*(boss.type==="leviathan"?.8:.55))*(state.stage===1?25:34);const n=boss.parts.filter(p=>!p.destroyed).length;boss.phase=boss.type==="sovereign"?(n>=3?1:n>=2?2:n>=1?3:4):(n>=2?1:n===1?2:3);for(const p of boss.parts){if(p.destroyed)continue;if(boss.grace>0)continue;p.fire-=dt;if(p.fire<=0){bossPartAttack(p);p.fire=state.stage===1?rand(2.15,2.75):rand(Math.max(.38,.82-state.stage*.06),Math.max(.6,1.15-state.stage*.05))}if(p.hp<=0)destroyBossPart(p)}if(boss.grace<=0)boss.special-=dt;if(boss.special<=0){boss.special=state.stage===1?(boss.phase>=3?4.8:5.8):boss.type==="sovereign"?1.15:boss.phase>=2?1.8:2.5;bossSpecial()}if(boss.laserWarn>0){boss.laserWarn-=dt;if(boss.laserWarn<=0){boss.laser=state.stage===1?.42:.65;state.shake=state.stage===1?4:7;audio.tone(85,.5,"sawtooth",.055,20)}}if(boss.laser>0)boss.laser-=dt;if(boss.hp<=0&&!boss.dead)destroyBoss()}
   function bossPartAttack(p){
     if(state.stage===1&&eBullets.length>=22)return;
 
@@ -883,7 +933,7 @@
       })
     }
   }
-  function destroyBossPart(p){p.destroyed=true;state.bossParts++;state.score+=2500*state.stage;state.hitstop=.08;addExplosion(boss.x+p.ox,boss.y+p.oy,1.5,true);state.message=`${p.name} 파괴`;state.messageTimer=1}
+  function destroyBossPart(p){p.hp=0;p.destroyed=true;state.bossParts++;state.score+=2500*state.stage;state.hitstop=.08;addExplosion(boss.x+p.ox,boss.y+p.oy,1.5,true);state.message=`${p.name} 파괴`;state.messageTimer=1}
   function destroyBoss(){boss.dead=true;boss.dying=1.7;boss.explosionTick=0;state.score+=20000*state.stage;state.hitstop=.16;state.shake=14;eBullets.length=0}
   function drawBoss(){
     if(!boss)return;
@@ -915,14 +965,14 @@
     const ratio=clamp(bossTotalHp()/bossTotalMax(),0,1);
     ctx.fillStyle="#170705";
     ctx.fillRect((W-bw)/2,18,bw,7);
-    ctx.fillStyle=ratio<.35?C.red:C.orange;
+    ctx.fillStyle=boss.hpFlash>0?C.white:(ratio<.35?C.red:C.orange);
     ctx.fillRect((W-bw)/2,18,bw*ratio,7);
     ctx.strokeStyle=C.white;
     ctx.strokeRect((W-bw)/2+.5,18.5,bw-1,6);
     ctx.fillStyle=C.red;
     ctx.font="8px monospace";
     ctx.textAlign="center";
-    ctx.fillText(`${boss.name}  단계 ${boss.phase}`,W/2,14)
+    ctx.fillText(`${boss.name} · ${Math.ceil(ratio*100)}% · 단계 ${boss.phase}`,W/2,14)
   }
   function drawBioBoss(){ctx.fillStyle="#424750";ctx.fillRect(-76,-66,134,132);ctx.fillStyle=C.steel2;ctx.fillRect(-68,-74,118,148);ctx.fillStyle=C.ink;ctx.fillRect(-51,-48,88,96);ctx.fillStyle=C.flesh;ctx.fillRect(-43,-38,72,76);ctx.fillStyle=C.red2;ctx.fillRect(-38,-30,62,60);ctx.fillStyle=C.steel;ctx.fillRect(-45,30,72,20);ctx.fillStyle=C.ink;for(let x=-38;x<24;x+=12)ctx.fillRect(x,31,6,17);drawBossCore(-10,0)}
   function drawRailBoss(){ctx.fillStyle="#4c5059";ctx.fillRect(-88,-54,160,108);ctx.fillStyle="#232833";ctx.fillRect(-78,-42,140,84);ctx.fillStyle=C.red2;ctx.fillRect(-40,-26,65,52);ctx.fillStyle=C.steel;for(let y=-45;y<=40;y+=17)ctx.fillRect(45,y,30,8);ctx.fillStyle=C.orange;ctx.fillRect(-92,-7,70,14);drawBossCore(0,0)}
@@ -950,19 +1000,25 @@
   }
   function damageBossArea(x,y,dmg,radius){
     if(!boss)return;
+
+    const distanceToBoss=Math.hypot((boss.x-12)-x,boss.y-y);
+    if(distanceToBoss<=radius+Math.max(boss.w,boss.h)*.48){
+      applyBossDamage(dmg*1.55,x,y)
+    }
+
     for(const p of boss.parts){
       if(p.destroyed)continue;
-      const px=boss.x+p.ox,py=boss.y+p.oy;
+      const px=boss.x+p.ox;
+      const py=boss.y+p.oy;
       if(Math.hypot(px-x,py-y)<=radius+Math.max(p.w,p.h)*.4){
-        p.hp-=dmg*1.15;
-        addHit(px,py);
+        p.hp-=dmg*.72
       }
     }
-    const coreX=boss.x-12,coreY=boss.y;
-    if(Math.hypot(coreX-x,coreY-y)<=radius+22){
-      const vulnerability=state.stage===1?(boss.phase>=3?1:.58):(boss.phase>=(boss.type==="sovereign"?4:3)?1:.32);
-      boss.coreHp-=dmg*vulnerability;
-      addHit(coreX,coreY);
+
+    const coreX=boss.x-12;
+    const coreY=boss.y;
+    if(Math.hypot(coreX-x,coreY-y)<=radius+25){
+      boss.coreHp=Math.max(0,boss.coreHp-dmg*.7)
     }
   }
   function detonateNapalm(m){
@@ -1405,20 +1461,21 @@
     if(!boss||projectile.dead)return false;
 
     let hit=false;
+    const totalMultiplier=isMissile?1.45:1.15;
 
     for(const p of boss.parts){
       if(p.destroyed)continue;
-      const r={x:boss.x+p.ox,y:boss.y+p.oy,w:p.w,h:p.h};
 
-      if(aabb(projectile,r)){
-        const partDamage=dmg*(isMissile?1.25:1);
-        p.hp-=partDamage;
+      const partRect={
+        x:boss.x+p.ox,
+        y:boss.y+p.oy,
+        w:p.w+10,
+        h:p.h+10
+      };
 
-        if(state.stage===1){
-          boss.coreHp-=dmg*(isMissile?.16:.08)
-        }
-
-        addHit(projectile.x,projectile.y);
+      if(aabb(projectile,partRect)){
+        p.hp-=dmg*(isMissile?1.2:1);
+        applyBossDamage(dmg*totalMultiplier,projectile.x,projectile.y);
         projectile.dead=true;
         hit=true;
         break
@@ -1426,31 +1483,41 @@
     }
 
     if(!hit){
-      const core={x:boss.x-12,y:boss.y,w:54,h:48};
+      const coreRect={
+        x:boss.x-12,
+        y:boss.y,
+        w:66,
+        h:58
+      };
 
-      if(aabb(projectile,core)){
-        const threshold=boss.type==="sovereign"?4:3;
-        const vulnerability=state.stage===1
-          ? (boss.phase>=threshold?1:.58)
-          : (boss.phase>=threshold?1:.32);
-
-        boss.coreHp-=dmg*vulnerability*(isMissile?1.35:1);
-        addHit(projectile.x,projectile.y);
+      if(aabb(projectile,coreRect)){
+        boss.coreHp=Math.max(0,boss.coreHp-dmg*(isMissile?1.35:1));
+        applyBossDamage(dmg*(isMissile?1.8:1.4),projectile.x,projectile.y);
         projectile.dead=true;
         hit=true
-      }else if(aabb(projectile,boss)){
-        const chip=state.stage===1?(isMissile?.48:.32):(isMissile?.28:.16);
-        boss.coreHp-=dmg*chip;
-        addHit(projectile.x,projectile.y);
+      }
+    }
+
+    if(!hit){
+      const bodyRect={
+        x:boss.x-8,
+        y:boss.y,
+        w:boss.w*.98,
+        h:boss.h*.94
+      };
+
+      if(aabb(projectile,bodyRect)){
+        applyBossDamage(dmg*totalMultiplier,projectile.x,projectile.y);
+        boss.coreHp=Math.max(0,boss.coreHp-dmg*.18);
         projectile.dead=true;
         hit=true
       }
     }
 
     if(hit){
-      boss.coreHp=Math.max(0,boss.coreHp);
       audio.hit()
     }
+
     return hit
   }
 
@@ -1546,10 +1613,13 @@
     getBossHealth(){return bossHealthSnapshot()},
     testPrimaryBossHit(amount=10){
       if(!boss)return null;
-      const target=boss.parts.find(p=>!p.destroyed);
-      const projectile=target
-        ? {x:boss.x+target.ox,y:boss.y+target.oy,w:10,h:6,dead:false}
-        : {x:boss.x-12,y:boss.y,w:10,h:6,dead:false};
+      const projectile={
+        x:boss.x-boss.w*.35,
+        y:boss.y,
+        w:12,
+        h:8,
+        dead:false
+      };
       hitBoss(projectile,amount,false);
       return bossHealthSnapshot()
     },
@@ -1559,7 +1629,8 @@
         speedY:config.playerSpeedY,
         radius:config.stickRadius,
         deadzone:config.stickDeadzone,
-        bounds:MOVE_BOUNDS
+        bounds:MOVE_BOUNDS,
+        fullScreen:MOVE_BOUNDS.maxX===W-16
       }
     },
     getEnemyBulletCount(){return eBullets.length},
