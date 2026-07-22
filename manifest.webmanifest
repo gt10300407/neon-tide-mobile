@@ -1,7 +1,7 @@
 {
   "name": "네온 타이드 모바일",
   "short_name": "네온 타이드",
-  "description": "5스테이지 모바일 횡스크롤 슈팅 게임",
+  "description": "보이지 않는 아날로그 조작과 기본 미사일 5종을 갖춘 모바일 슈팅 게임",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
