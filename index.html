@@ -9,7 +9,7 @@
 <meta name="apple-mobile-web-app-title" content="NEON TIDE">
 <link rel="manifest" href="./manifest.webmanifest">
 <link rel="apple-touch-icon" href="./icon-192.png">
-<title>네온 타이드 V3.5 · 아날로그 조작·기본 미사일 교체</title>
+<title>네온 타이드 V3.6 · 반응형 조작·보스 밸런스</title>
 <style>
   :root{--red:#e23725;--amber:#f2a93b;--cream:#f3ead2;--blue:#2f6fc8;--panel:#05070c}
   *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
@@ -56,8 +56,8 @@
   <div id="menu" class="overlay">
     <div>
       <h1 class="title">NEON TIDE</h1>
-      <div class="subtitle">모바일 캠페인 · 보이지 않는 아날로그 조작 · 기본 미사일 5종</div>
-      <p class="copy">화면 왼쪽을 누른 지점을 중심으로 보이지 않는 아날로그 스틱이 작동합니다. 미사일 아이템을 먹으면 자동 발사되는 기본 미사일 자체가 5종 중 하나로 변경됩니다.</p>
+      <div class="subtitle">모바일 캠페인 · 빠른 아날로그 조작 · 완화된 1단계</div>
+      <p class="copy">짧게 밀어도 즉시 반응하는 보이지 않는 아날로그 스틱을 적용했습니다. 모든 기본 미사일이 보스 부위와 본체 체력을 실제로 깎으며, 1단계 탄막을 크게 완화했습니다.</p>
       <button id="start-button" class="main-button" type="button">캠페인 시작 · 1단계</button>
       <section class="record-panel" aria-label="누적 캠페인 기록">
         <div class="record-grid">
@@ -116,15 +116,15 @@
   };
   const btnMissile=document.getElementById("btn-missile"),btnBomb=document.getElementById("btn-bomb"),btnPause=document.getElementById("btn-pause"),btnSound=document.getElementById("btn-sound"),touchGuide=document.getElementById("touch-guide");
   const C={black:"#000",deep:"#02050d",navy:"#07152f",blue:"#0e3274",sky:"#2967bf",cloudDark:"#7395c9",cloud:"#c7d9f1",white:"#f4ecd7",steel:"#a8afbb",steel2:"#646b75",red:"#df3522",red2:"#7c150d",orange:"#f07a19",yellow:"#f4d45b",green:"#6b9e35",green2:"#2d4c1d",cyan:"#79d8ff",purple:"#7357a7",flesh:"#a4483e",ink:"#141721",acid:"#9ecb3b",acidDark:"#284723",violet:"#69498c"};
-  const MOVE_BOUNDS={minX:30,maxX:W*.46,minY:28,maxY:H-28};
+  const MOVE_BOUNDS={minX:26,maxX:W*.52,minY:24,maxY:H-24};
   const config={
     autoFire:true,
     maxPlayerBullets:180,
     maxEnemyBullets:260,
-    playerSpeedX:168,
-    playerSpeedY:206,
-    stickRadius:48,
-    stickDeadzone:5
+    playerSpeedX:258,
+    playerSpeedY:312,
+    stickRadius:30,
+    stickDeadzone:2
   };
   const MISSILE_TYPES={
     search:{name:"추적 미사일",short:"추",color:C.cyan,description:"여러 표적 자동 추적"},
@@ -191,7 +191,8 @@
       return
     }
     const clamped=Math.min(config.stickRadius,length);
-    const strength=(clamped-config.stickDeadzone)/(config.stickRadius-config.stickDeadzone);
+    const normalized=(clamped-config.stickDeadzone)/(config.stickRadius-config.stickDeadzone);
+    const strength=Math.min(1,.24+.76*Math.sqrt(Math.max(0,normalized)));
     input.axisX=(rawX/length)*strength;
     input.axisY=(rawY/length)*strength
   });
@@ -664,8 +665,99 @@
     if(name==="SURFACE_DIVE")for(let i=0;i<8;i++)spawnEnemy("blade",R+i*25,H-42,{pattern:"dive",baseY:H-42,phase:i*.35});if(name==="MINE_FIELD")for(let i=0;i<10;i++)spawnEnemy("mine",R+i*38,rand(42,H-42),{vx:-65});if(name==="BUBBLE_SWARM")for(let i=0;i<9;i++)spawnEnemy("scout",R+i*23,rand(55,H-60),{pattern:"bubble",amp:38,phase:i*.7});if(name==="ACID_PINCER")for(let i=0;i<5;i++){spawnEnemy("blade",R+i*26,35,{pattern:"acidPincer",side:1,phase:i*.25});spawnEnemy("blade",R+i*26,H-35,{pattern:"acidPincer",side:-1,phase:i*.25})}if(name==="LEVIATHAN_SCOUTS"){spawnEnemy("guardian",R+35,H/2,{pattern:"hover"});for(let i=0;i<6;i++)spawnEnemy("mine",R+110+i*25,rand(45,H-45),{})}
     if(name==="ORBIT_RING")for(let i=0;i<8;i++)spawnEnemy("orbiter",R+i*20,H/2,{pattern:"orbit",phase:i*Math.PI/4,baseY:H/2,amp:68});if(name==="REVERSE_AMBUSH"){for(let i=0;i<4;i++)spawnEnemy("blade",-20-i*22,55+i*45,{vx:125,reverse:true,elite:true});for(let i=0;i<5;i++)spawnEnemy("scout",R+i*24,rand(50,H-50),{elite:true})}if(name==="SPINNER_STORM")for(let i=0;i<11;i++)spawnEnemy("spinner",R+i*22,rand(40,H-40),{vx:-150,elite:i%3===0});if(name==="TWIN_ATTACK"){spawnEnemy("guardian",R+30,75,{elite:true});spawnEnemy("guardian",R+90,195,{elite:true})}
     if(name==="ELITE_LINE")for(let i=0;i<8;i++)spawnEnemy(i%3===0?"turret":"blade",R+i*27,40+i*24,{elite:true,vx:-145});if(name==="MIXED_GAUNTLET"){for(let i=0;i<12;i++)spawnEnemy(choose(["blade","spinner","turret","orbiter"]),R+i*24,rand(38,H-38),{elite:true})}if(name==="GUARDIAN")spawnEnemy("guardian",R+20,H/2,{elite:true,hp:70,maxHp:70});if(name==="FINAL_RUSH")for(let i=0;i<16;i++)spawnEnemy(i%4===0?"turret":"blade",R+i*16,rand(35,H-35),{elite:true,vx:-175,fire:i%4===0?.5:999})}
-  function updateEnemies(dt){for(const e of enemies){e.age+=dt;e.flash=Math.max(0,e.flash-dt);e.x+=e.vx*dt;if(e.pattern==="sine")e.y=e.baseY+Math.sin(e.age*e.freq+e.phase)*e.amp;if(e.pattern==="pincer")e.y+=e.side*32*dt*Math.sin(e.age*1.5);if(e.pattern==="hover")e.y=e.baseY+Math.sin(e.age*1.2)*42;if(e.pattern==="carrier"){e.y=e.baseY+Math.sin(e.age*.9)*36;if(e.age>2.2&&e.x>W-150&&!e.deployed){e.deployed=true;for(let i=0;i<5;i++)spawnEnemy("scout",e.x+10+i*10,e.y+(i-2)*12,{vx:-125,fire:rand(.5,1)})}}if(e.pattern==="dive")e.y=e.baseY-Math.abs(Math.sin(e.age*1.7+e.phase))*150;if(e.pattern==="bubble")e.y=e.baseY+Math.sin(e.age*2.1+e.phase)*e.amp;if(e.pattern==="acidPincer")e.y+=e.side*55*dt;if(e.pattern==="orbit"){e.y=e.baseY+Math.sin(e.age*2.2+e.phase)*e.amp;e.x+=Math.cos(e.age*2.2+e.phase)*22*dt}if(e.pattern==="mine")e.y+=Math.sin(e.age*2)*8*dt;e.fire-=dt;if(e.fire<=0&&e.x<W-15&&e.x>35){e.fire=e.type==="turret"?rand(.55,.85):e.type==="carrier"||e.type==="guardian"?rand(.35,.6):rand(.85,1.5);shootEnemy(e)}}for(let i=enemies.length-1;i>=0;i--){const e=enemies[i];if(e.hp<=0&&!e.dead)destroyEnemy(e);if(e.dead||(!e.reverse&&e.x<-75)||(e.reverse&&e.x>W+75))enemies.splice(i,1)}}
-  function shootEnemy(e){if(eBullets.length>config.maxEnemyBullets||!player.alive)return;const a=Math.atan2(player.y-e.y,player.x-e.x),spd=105+(state.stage-1)*12;if(e.type==="carrier"||e.type==="guardian"||e.type==="rail"){const n=e.type==="guardian"?5:3;for(let i=0;i<n;i++){const aa=a+(i-(n-1)/2)*.12;eBullets.push({x:e.x-22,y:e.y,vx:Math.cos(aa)*spd,vy:Math.sin(aa)*spd,r:4,kind:"orb",dead:false})}}else if(e.type==="orbiter"){for(let i=0;i<4;i++){const aa=a+i*Math.PI/2;eBullets.push({x:e.x,y:e.y,vx:Math.cos(aa)*(spd-5),vy:Math.sin(aa)*(spd-5),r:3,kind:"orb",dead:false})}}else eBullets.push({x:e.x-9,y:e.y,vx:Math.cos(a)*spd,vy:Math.sin(a)*spd,r:e.type==="turret"?4:3,kind:"orb",dead:false})}
+  function updateEnemies(dt){
+    for(const e of enemies){
+      e.age+=dt;
+      e.flash=Math.max(0,e.flash-dt);
+      e.x+=e.vx*dt;
+
+      if(e.pattern==="sine")e.y=e.baseY+Math.sin(e.age*e.freq+e.phase)*e.amp;
+      if(e.pattern==="pincer")e.y+=e.side*32*dt*Math.sin(e.age*1.5);
+      if(e.pattern==="hover")e.y=e.baseY+Math.sin(e.age*1.2)*42;
+      if(e.pattern==="carrier"){
+        e.y=e.baseY+Math.sin(e.age*.9)*36;
+        if(e.age>2.2&&e.x>W-150&&!e.deployed){
+          e.deployed=true;
+          const escortCount=state.stage===1?3:5;
+          for(let i=0;i<escortCount;i++){
+            spawnEnemy("scout",e.x+10+i*12,e.y+(i-(escortCount-1)/2)*15,{
+              vx:state.stage===1?-108:-125,
+              fire:state.stage===1?rand(1.3,2):rand(.5,1)
+            })
+          }
+        }
+      }
+
+      if(e.pattern==="dive")e.y=e.baseY-Math.abs(Math.sin(e.age*1.7+e.phase))*150;
+      if(e.pattern==="bubble")e.y=e.baseY+Math.sin(e.age*2.1+e.phase)*e.amp;
+      if(e.pattern==="acidPincer")e.y+=e.side*55*dt;
+      if(e.pattern==="orbit"){
+        e.y=e.baseY+Math.sin(e.age*2.2+e.phase)*e.amp;
+        e.x+=Math.cos(e.age*2.2+e.phase)*22*dt
+      }
+      if(e.pattern==="mine")e.y+=Math.sin(e.age*2)*8*dt;
+
+      e.fire-=dt;
+      if(e.fire<=0&&e.x<W-15&&e.x>35){
+        const calm=state.stage===1?1.65:1;
+        if(e.type==="turret")e.fire=rand(.55,.85)*calm;
+        else if(e.type==="carrier"||e.type==="guardian")e.fire=rand(.35,.6)*calm;
+        else e.fire=rand(.85,1.5)*calm;
+        shootEnemy(e)
+      }
+    }
+
+    for(let i=enemies.length-1;i>=0;i--){
+      const e=enemies[i];
+      if(e.hp<=0&&!e.dead)destroyEnemy(e);
+      if(e.dead||(!e.reverse&&e.x<-75)||(e.reverse&&e.x>W+75))enemies.splice(i,1)
+    }
+  }
+  function shootEnemy(e){
+    const cap=state.stage===1?46:config.maxEnemyBullets;
+    if(eBullets.length>=cap||!player.alive)return;
+
+    const a=Math.atan2(player.y-e.y,player.x-e.x);
+    const spd=state.stage===1?82:105+(state.stage-1)*12;
+
+    if(e.type==="carrier"||e.type==="guardian"||e.type==="rail"){
+      const n=state.stage===1?(e.type==="guardian"?3:2):(e.type==="guardian"?5:3);
+      for(let i=0;i<n;i++){
+        const spread=state.stage===1?.15:.12;
+        const aa=a+(i-(n-1)/2)*spread;
+        eBullets.push({
+          x:e.x-22,y:e.y,
+          vx:Math.cos(aa)*spd,
+          vy:Math.sin(aa)*spd,
+          r:state.stage===1?3:4,
+          kind:"orb",
+          dead:false
+        })
+      }
+    }else if(e.type==="orbiter"){
+      const n=state.stage===1?3:4;
+      for(let i=0;i<n;i++){
+        const aa=a+i*Math.PI*2/n;
+        eBullets.push({
+          x:e.x,y:e.y,
+          vx:Math.cos(aa)*(spd-5),
+          vy:Math.sin(aa)*(spd-5),
+          r:3,
+          kind:"orb",
+          dead:false
+        })
+      }
+    }else{
+      eBullets.push({
+        x:e.x-9,y:e.y,
+        vx:Math.cos(a)*spd,
+        vy:Math.sin(a)*spd,
+        r:state.stage===1?2.7:(e.type==="turret"?4:3),
+        kind:"orb",
+        dead:false
+      })
+    }
+  }
   function destroyEnemy(e){e.dead=true;state.kills++;state.combo++;state.maxCombo=Math.max(state.maxCombo,state.combo);state.comboTimer=2;state.multiplier=1+Math.min(5,(state.combo/5)|0);const gain=Math.round(e.score*state.multiplier*(1+(state.stage-1)*.12));state.score+=gain;addScoreText(e.x,e.y,String(gain));addExplosion(e.x,e.y,(e.type==="carrier"||e.type==="guardian"||e.type==="rail")?1.6:1,["carrier","guardian","rail"].includes(e.type));if(Math.random()<(["carrier","guardian","rail"].includes(e.type)?1:.28))spawnPickup(e.x,e.y)}
 
   function spawnHazard(type){if(type==="WALL_PAIR"){hazards.push({type:"wall",x:W+30,y:39,w:42,h:70,vx:-62,dead:false});hazards.push({type:"wall",x:W+30,y:H-39,w:42,h:70,vx:-62,dead:false})}if(type==="LASER_GATE")hazards.push({type:"gate",x:W+50,y:H/2,w:14,h:H-42,vx:-48,age:0,warn:1.2,active:1.4,dead:false});if(type==="ACID_SURGE")hazards.push({type:"acid",age:0,duration:4,dead:false});if(type==="ASTEROID_FIELD")for(let i=0;i<8;i++)hazards.push({type:"asteroid",x:W+30+i*55,y:rand(32,H-32),w:rand(18,36),h:rand(18,36),vx:-rand(75,135),vy:rand(-12,12),rot:rand(0,6),dead:false});if(type==="CORE_BEAMS")for(const y of [55,135,215])hazards.push({type:"coreBeam",x:W+rand(10,60),y,w:W,h:10,vx:0,age:0,warn:.8,active:.55,dead:false})}
@@ -679,14 +771,159 @@
     twins:{name:"쌍둥이 코어 함대",targetX:388,w:190,h:190,core:300,parts:[[-32,-61,70,44,105,"알파 코어"],[-32,61,70,44,105,"베타 코어"],[28,0,42,54,80,"연결 장치"]]},
     sovereign:{name:"붉은 지배자",targetX:382,w:205,h:205,core:420,parts:[[-60,-60,42,34,96,"왕관 포대"],[-60,60,42,34,96,"턱 포대"],[4,-78,52,28,112,"미사일 왕관"],[15,72,52,28,112,"중력 장치"]]}
   };
-  function spawnBoss(){const d=BOSS_DATA[currentStage().boss];state.bossSpawned=true;state.message="경고";state.messageTimer=2.4;audio.warning();boss={type:currentStage().boss,name:d.name,x:W+120,y:H/2,w:d.w,h:d.h,age:0,targetX:d.targetX,coreHp:d.core,coreMax:d.core,phase:1,fire:.9,laser:0,laserWarn:0,special:state.stage===1?3.6:1.4,grace:state.stage===1?2.8:1.2,dead:false,dying:0,explosionTick:0,parts:d.parts.map((p,i)=>({id:`p${i}`,ox:p[0],oy:p[1],w:p[2],h:p[3],hp:p[4],maxHp:p[4],name:p[5],destroyed:false,fire:rand(.55,1.1)}))}}
-  function updateBoss(dt){if(!boss)return;if(boss.dying>0){boss.dying-=dt;boss.explosionTick-=dt;if(boss.explosionTick<=0){boss.explosionTick=.11;addExplosion(boss.x+rand(-80,55),boss.y+rand(-80,80),rand(.8,1.8),true)}if(boss.dying<=0){boss=null;state.mode="stageclear";state.clearTimer=2.7;state.message=`${state.stage}단계 완료`;state.messageTimer=2.7;eBullets.length=0;hazards.length=0}return}boss.age+=dt;boss.grace=Math.max(0,boss.grace-dt);boss.x=lerp(boss.x,boss.targetX,Math.min(1,dt*1.1));boss.y=H/2+Math.sin(boss.age*(boss.type==="leviathan"?.8:.55))*34;const n=boss.parts.filter(p=>!p.destroyed).length;boss.phase=boss.type==="sovereign"?(n>=3?1:n>=2?2:n>=1?3:4):(n>=2?1:n===1?2:3);for(const p of boss.parts){if(p.destroyed)continue;if(boss.grace>0)continue;p.fire-=dt;if(p.fire<=0){bossPartAttack(p);p.fire=state.stage===1?rand(1.25,1.65):rand(Math.max(.38,.82-state.stage*.06),Math.max(.6,1.15-state.stage*.05))}if(p.hp<=0)destroyBossPart(p)}if(boss.grace<=0)boss.special-=dt;if(boss.special<=0){boss.special=state.stage===1?(boss.phase>=2?3.2:4.0):boss.type==="sovereign"?1.15:boss.phase>=2?1.8:2.5;bossSpecial()}if(boss.laserWarn>0){boss.laserWarn-=dt;if(boss.laserWarn<=0){boss.laser=.65;state.shake=7;audio.tone(85,.5,"sawtooth",.055,20)}}if(boss.laser>0)boss.laser-=dt;if(boss.coreHp<=0&&!boss.dead)destroyBoss()}
-  function bossPartAttack(p){const sx=boss.x+p.ox-p.w/2,sy=boss.y+p.oy,a=Math.atan2(player.y-sy,player.x-sx),spd=state.stage===1?92:120+(state.stage-1)*11,n=state.stage===1?(boss.phase>=3?3:2):(boss.phase>=3?5:3);for(let i=0;i<n;i++){const aa=a+(i-(n-1)/2)*.12;eBullets.push({x:sx,y:sy,vx:Math.cos(aa)*spd,vy:Math.sin(aa)*spd,r:4,kind:"orb",dead:false})}}
-  function bossSpecial(){if(boss.type==="bio"){if(boss.phase>=2){boss.laserWarn=state.stage===1?1.05:.65;audio.warning()}else spawnBossMissiles(state.stage===1?2:3)}else if(boss.type==="rail"){boss.laserWarn=.55;audio.warning();for(const y of [boss.y-45,boss.y+45])eBullets.push({x:boss.x-80,y,vx:-180,vy:0,r:5,kind:"orb",dead:false})}else if(boss.type==="leviathan"){for(let i=0;i<10;i++){const a=Math.PI+(i-4.5)*.13;eBullets.push({x:boss.x-65,y:boss.y,vx:Math.cos(a)*118,vy:Math.sin(a)*118,r:5,kind:"acid",dead:false})}if(boss.phase>=2)spawnHazard("ACID_SURGE")}else if(boss.type==="twins"){const alive=boss.parts.filter(p=>!p.destroyed);for(const p of alive)for(let i=0;i<6;i++){const a=Math.PI+(i-2.5)*.18;eBullets.push({x:boss.x+p.ox-35,y:boss.y+p.oy,vx:Math.cos(a)*135,vy:Math.sin(a)*135,r:4,kind:"orb",dead:false})}if(boss.phase>=2)spawnBossMissiles(4)}else{const mode=(boss.age*1.2|0)%3;if(mode===0){boss.laserWarn=.45;audio.warning()}else if(mode===1)spawnBossMissiles(5);else for(const y of [55,135,215])hazards.push({type:"coreBeam",x:0,y,w:W,h:10,vx:0,age:0,warn:.6,active:.55,dead:false})}}
-  function spawnBossMissiles(n){for(let i=0;i<n;i++)eBullets.push({x:boss.x-70,y:boss.y+(i-(n-1)/2)*12,vx:-95,vy:(i-(n-1)/2)*13,r:4,kind:"missile",homing:1.8,dead:false})}
+  function bossTotalMax(){
+    if(!boss)return 1;
+    return boss.coreMax+boss.parts.reduce((sum,p)=>sum+p.maxHp,0)
+  }
+  function bossTotalHp(){
+    if(!boss)return 0;
+    return Math.max(0,boss.coreHp)+boss.parts.reduce((sum,p)=>sum+Math.max(0,p.hp),0)
+  }
+  function bossHealthSnapshot(){
+    if(!boss)return null;
+    return {
+      core:boss.coreHp,
+      total:bossTotalHp(),
+      max:bossTotalMax(),
+      parts:boss.parts.map(p=>({name:p.name,hp:p.hp,max:p.maxHp,destroyed:p.destroyed}))
+    }
+  }
+  function spawnBoss(){const d=BOSS_DATA[currentStage().boss];state.bossSpawned=true;state.message="경고";state.messageTimer=2.4;audio.warning();boss={type:currentStage().boss,name:d.name,x:W+120,y:H/2,w:d.w,h:d.h,age:0,targetX:d.targetX,coreHp:d.core,coreMax:d.core,phase:1,fire:.9,laser:0,laserWarn:0,special:state.stage===1?5.5:1.4,grace:state.stage===1?4.0:1.2,dead:false,dying:0,explosionTick:0,parts:d.parts.map((p,i)=>({id:`p${i}`,ox:p[0],oy:p[1],w:p[2],h:p[3],hp:p[4],maxHp:p[4],name:p[5],destroyed:false,fire:rand(.55,1.1)}))}}
+  function updateBoss(dt){if(!boss)return;if(boss.dying>0){boss.dying-=dt;boss.explosionTick-=dt;if(boss.explosionTick<=0){boss.explosionTick=.11;addExplosion(boss.x+rand(-80,55),boss.y+rand(-80,80),rand(.8,1.8),true)}if(boss.dying<=0){boss=null;state.mode="stageclear";state.clearTimer=2.7;state.message=`${state.stage}단계 완료`;state.messageTimer=2.7;eBullets.length=0;hazards.length=0}return}boss.age+=dt;boss.grace=Math.max(0,boss.grace-dt);boss.x=lerp(boss.x,boss.targetX,Math.min(1,dt*1.1));boss.y=H/2+Math.sin(boss.age*(boss.type==="leviathan"?.8:.55))*(state.stage===1?25:34);const n=boss.parts.filter(p=>!p.destroyed).length;boss.phase=boss.type==="sovereign"?(n>=3?1:n>=2?2:n>=1?3:4):(n>=2?1:n===1?2:3);for(const p of boss.parts){if(p.destroyed)continue;if(boss.grace>0)continue;p.fire-=dt;if(p.fire<=0){bossPartAttack(p);p.fire=state.stage===1?rand(2.15,2.75):rand(Math.max(.38,.82-state.stage*.06),Math.max(.6,1.15-state.stage*.05))}if(p.hp<=0)destroyBossPart(p)}if(boss.grace<=0)boss.special-=dt;if(boss.special<=0){boss.special=state.stage===1?(boss.phase>=3?4.8:5.8):boss.type==="sovereign"?1.15:boss.phase>=2?1.8:2.5;bossSpecial()}if(boss.laserWarn>0){boss.laserWarn-=dt;if(boss.laserWarn<=0){boss.laser=state.stage===1?.42:.65;state.shake=state.stage===1?4:7;audio.tone(85,.5,"sawtooth",.055,20)}}if(boss.laser>0)boss.laser-=dt;if(boss.coreHp<=0&&!boss.dead)destroyBoss()}
+  function bossPartAttack(p){
+    if(state.stage===1&&eBullets.length>=22)return;
+
+    const sx=boss.x+p.ox-p.w/2;
+    const sy=boss.y+p.oy;
+    const a=Math.atan2(player.y-sy,player.x-sx);
+    const spd=state.stage===1?76:120+(state.stage-1)*11;
+    const n=state.stage===1?(boss.phase>=3?2:1):(boss.phase>=3?5:3);
+
+    for(let i=0;i<n;i++){
+      const spread=state.stage===1?.18:.12;
+      const aa=a+(i-(n-1)/2)*spread;
+      eBullets.push({
+        x:sx,y:sy,
+        vx:Math.cos(aa)*spd,
+        vy:Math.sin(aa)*spd,
+        r:state.stage===1?3:4,
+        kind:"orb",
+        dead:false
+      })
+    }
+  }
+  function bossSpecial(){
+    if(boss.type==="bio"){
+      if(state.stage===1){
+        if(boss.phase>=3){
+          boss.laserWarn=1.25;
+          audio.warning()
+        }else{
+          spawnBossMissiles(boss.phase===1?1:2)
+        }
+      }else if(boss.phase>=2){
+        boss.laserWarn=.65;
+        audio.warning()
+      }else{
+        spawnBossMissiles(3)
+      }
+    }else if(boss.type==="rail"){
+      boss.laserWarn=.55;
+      audio.warning();
+      for(const y of [boss.y-45,boss.y+45]){
+        eBullets.push({x:boss.x-80,y,vx:-180,vy:0,r:5,kind:"orb",dead:false})
+      }
+    }else if(boss.type==="leviathan"){
+      for(let i=0;i<10;i++){
+        const a=Math.PI+(i-4.5)*.13;
+        eBullets.push({x:boss.x-65,y:boss.y,vx:Math.cos(a)*118,vy:Math.sin(a)*118,r:5,kind:"acid",dead:false})
+      }
+      if(boss.phase>=2)spawnHazard("ACID_SURGE")
+    }else if(boss.type==="twins"){
+      const alive=boss.parts.filter(p=>!p.destroyed);
+      for(const p of alive){
+        for(let i=0;i<6;i++){
+          const a=Math.PI+(i-2.5)*.18;
+          eBullets.push({x:boss.x+p.ox-35,y:boss.y+p.oy,vx:Math.cos(a)*135,vy:Math.sin(a)*135,r:4,kind:"orb",dead:false})
+        }
+      }
+      if(boss.phase>=2)spawnBossMissiles(4)
+    }else{
+      const mode=(boss.age*1.2|0)%3;
+      if(mode===0){
+        boss.laserWarn=.45;
+        audio.warning()
+      }else if(mode===1){
+        spawnBossMissiles(5)
+      }else{
+        for(const y of [55,135,215]){
+          hazards.push({type:"coreBeam",x:0,y,w:W,h:10,vx:0,age:0,warn:.6,active:.55,dead:false})
+        }
+      }
+    }
+  }
+  function spawnBossMissiles(n){
+    const cap=state.stage===1?22:config.maxEnemyBullets;
+    if(eBullets.length>=cap)return;
+
+    const speed=state.stage===1?68:95;
+    const homing=state.stage===1?.65:1.8;
+    const radius=state.stage===1?3:4;
+
+    for(let i=0;i<n&&eBullets.length<cap;i++){
+      eBullets.push({
+        x:boss.x-70,
+        y:boss.y+(i-(n-1)/2)*16,
+        vx:-speed,
+        vy:(i-(n-1)/2)*(state.stage===1?9:13),
+        r:radius,
+        kind:"missile",
+        homing,
+        dead:false
+      })
+    }
+  }
   function destroyBossPart(p){p.destroyed=true;state.bossParts++;state.score+=2500*state.stage;state.hitstop=.08;addExplosion(boss.x+p.ox,boss.y+p.oy,1.5,true);state.message=`${p.name} 파괴`;state.messageTimer=1}
   function destroyBoss(){boss.dead=true;boss.dying=1.7;boss.explosionTick=0;state.score+=20000*state.stage;state.hitstop=.16;state.shake=14;eBullets.length=0}
-  function drawBoss(){if(!boss)return;ctx.save();ctx.translate(boss.x|0,boss.y|0);if(boss.type==="bio")drawBioBoss();else if(boss.type==="rail")drawRailBoss();else if(boss.type==="leviathan")drawLeviathanBoss();else if(boss.type==="twins")drawTwinBoss();else drawSovereignBoss();for(const p of boss.parts)drawBossPart(p);if(boss.laserWarn>0){ctx.fillStyle="rgba(255,45,30,.45)";ctx.fillRect(-W,-4,W,8)}if(boss.laser>0){ctx.fillStyle=C.white;ctx.fillRect(-W,-9,W,18);ctx.fillStyle=C.yellow;ctx.fillRect(-W,-7,W,14);ctx.fillStyle=C.orange;ctx.fillRect(-W,-4,W,8)}ctx.restore();const bw=250;ctx.fillStyle="#170705";ctx.fillRect((W-bw)/2,18,bw,7);ctx.fillStyle=boss.phase>=3?C.red:C.orange;ctx.fillRect((W-bw)/2,18,bw*clamp(boss.coreHp/boss.coreMax,0,1),7);ctx.strokeStyle=C.white;ctx.strokeRect((W-bw)/2+.5,18.5,bw-1,6);ctx.fillStyle=C.red;ctx.font="8px monospace";ctx.textAlign="center";ctx.fillText(`${boss.name}  단계 ${boss.phase}`,W/2,14)}
+  function drawBoss(){
+    if(!boss)return;
+
+    ctx.save();
+    ctx.translate(boss.x|0,boss.y|0);
+
+    if(boss.type==="bio")drawBioBoss();
+    else if(boss.type==="rail")drawRailBoss();
+    else if(boss.type==="leviathan")drawLeviathanBoss();
+    else if(boss.type==="twins")drawTwinBoss();
+    else drawSovereignBoss();
+
+    for(const p of boss.parts)drawBossPart(p);
+
+    if(boss.laserWarn>0){
+      ctx.fillStyle="rgba(255,45,30,.45)";
+      ctx.fillRect(-W,-4,W,8)
+    }
+    if(boss.laser>0){
+      ctx.fillStyle=C.white;ctx.fillRect(-W,-9,W,18);
+      ctx.fillStyle=C.yellow;ctx.fillRect(-W,-7,W,14);
+      ctx.fillStyle=C.orange;ctx.fillRect(-W,-4,W,8)
+    }
+
+    ctx.restore();
+
+    const bw=250;
+    const ratio=clamp(bossTotalHp()/bossTotalMax(),0,1);
+    ctx.fillStyle="#170705";
+    ctx.fillRect((W-bw)/2,18,bw,7);
+    ctx.fillStyle=ratio<.35?C.red:C.orange;
+    ctx.fillRect((W-bw)/2,18,bw*ratio,7);
+    ctx.strokeStyle=C.white;
+    ctx.strokeRect((W-bw)/2+.5,18.5,bw-1,6);
+    ctx.fillStyle=C.red;
+    ctx.font="8px monospace";
+    ctx.textAlign="center";
+    ctx.fillText(`${boss.name}  단계 ${boss.phase}`,W/2,14)
+  }
   function drawBioBoss(){ctx.fillStyle="#424750";ctx.fillRect(-76,-66,134,132);ctx.fillStyle=C.steel2;ctx.fillRect(-68,-74,118,148);ctx.fillStyle=C.ink;ctx.fillRect(-51,-48,88,96);ctx.fillStyle=C.flesh;ctx.fillRect(-43,-38,72,76);ctx.fillStyle=C.red2;ctx.fillRect(-38,-30,62,60);ctx.fillStyle=C.steel;ctx.fillRect(-45,30,72,20);ctx.fillStyle=C.ink;for(let x=-38;x<24;x+=12)ctx.fillRect(x,31,6,17);drawBossCore(-10,0)}
   function drawRailBoss(){ctx.fillStyle="#4c5059";ctx.fillRect(-88,-54,160,108);ctx.fillStyle="#232833";ctx.fillRect(-78,-42,140,84);ctx.fillStyle=C.red2;ctx.fillRect(-40,-26,65,52);ctx.fillStyle=C.steel;for(let y=-45;y<=40;y+=17)ctx.fillRect(45,y,30,8);ctx.fillStyle=C.orange;ctx.fillRect(-92,-7,70,14);drawBossCore(0,0)}
   function drawLeviathanBoss(){ctx.fillStyle="#394f47";for(let i=0;i<5;i++){ctx.fillRect(-20+i*23,-64+Math.sin(boss.age+i)*18,28,128-i*8)}ctx.fillStyle=C.green2;ctx.fillRect(-70,-70,62,140);ctx.fillStyle=C.steel;ctx.fillRect(-82,-23,20,46);drawBossCore(-45,0)}
@@ -723,7 +960,7 @@
     }
     const coreX=boss.x-12,coreY=boss.y;
     if(Math.hypot(coreX-x,coreY-y)<=radius+22){
-      const vulnerability=boss.phase>=(boss.type==="sovereign"?4:3)?1:.26;
+      const vulnerability=state.stage===1?(boss.phase>=3?1:.58):(boss.phase>=(boss.type==="sovereign"?4:3)?1:.32);
       boss.coreHp-=dmg*vulnerability;
       addHit(coreX,coreY);
     }
@@ -1135,7 +1372,7 @@
 
     if(player.alive&&player.invuln<=0){
       for(const b of eBullets){
-        if(circleHit(b,player,b.r+7)){
+        if(circleHit(b,player,b.r+5.2)){
           b.dead=true;
           hitPlayer();
           break
@@ -1164,7 +1401,58 @@
     }
   }
   function damageEnemy(e,dmg,x,y){e.hp-=dmg;e.flash=.08;addHit(x,y);audio.hit();if(e.hp<=0)destroyEnemy(e)}
-  function hitBoss(projectile,dmg,isMissile=false){let hit=false;for(const p of boss.parts){if(p.destroyed)continue;const r={x:boss.x+p.ox,y:boss.y+p.oy,w:p.w,h:p.h};if(aabb(projectile,r)){p.hp-=dmg*(isMissile?1.25:1);addHit(projectile.x,projectile.y);projectile.dead=true;hit=true;break}}if(!hit){const core={x:boss.x-12,y:boss.y,w:48,h:42};if(aabb(projectile,core)){const vulnerability=boss.phase>=(boss.type==="sovereign"?4:3)?1:.26;boss.coreHp-=dmg*vulnerability*(isMissile?1.35:1);addHit(projectile.x,projectile.y);projectile.dead=true;hit=true}else if(aabb(projectile,boss)){projectile.dead=true;addHit(projectile.x,projectile.y)}}if(hit)audio.hit()}
+  function hitBoss(projectile,dmg,isMissile=false){
+    if(!boss||projectile.dead)return false;
+
+    let hit=false;
+
+    for(const p of boss.parts){
+      if(p.destroyed)continue;
+      const r={x:boss.x+p.ox,y:boss.y+p.oy,w:p.w,h:p.h};
+
+      if(aabb(projectile,r)){
+        const partDamage=dmg*(isMissile?1.25:1);
+        p.hp-=partDamage;
+
+        if(state.stage===1){
+          boss.coreHp-=dmg*(isMissile?.16:.08)
+        }
+
+        addHit(projectile.x,projectile.y);
+        projectile.dead=true;
+        hit=true;
+        break
+      }
+    }
+
+    if(!hit){
+      const core={x:boss.x-12,y:boss.y,w:54,h:48};
+
+      if(aabb(projectile,core)){
+        const threshold=boss.type==="sovereign"?4:3;
+        const vulnerability=state.stage===1
+          ? (boss.phase>=threshold?1:.58)
+          : (boss.phase>=threshold?1:.32);
+
+        boss.coreHp-=dmg*vulnerability*(isMissile?1.35:1);
+        addHit(projectile.x,projectile.y);
+        projectile.dead=true;
+        hit=true
+      }else if(aabb(projectile,boss)){
+        const chip=state.stage===1?(isMissile?.48:.32):(isMissile?.28:.16);
+        boss.coreHp-=dmg*chip;
+        addHit(projectile.x,projectile.y);
+        projectile.dead=true;
+        hit=true
+      }
+    }
+
+    if(hit){
+      boss.coreHp=Math.max(0,boss.coreHp);
+      audio.hit()
+    }
+    return hit
+  }
 
   function executeEvent(ev){const [,act,arg]=ev;if(act==="message"){state.message=arg;state.messageTimer=1.8}else if(act==="formation")spawnFormation(arg);else if(act==="hazard")spawnHazard(arg);else if(act==="supply")stageSupply();else if(act==="missileDrop")spawnRandomMissileItem();else if(act==="boss")spawnBoss()}
   function updateDirector(){const events=currentStage().events;while(state.eventIndex<events.length&&state.stageTime>=events[state.eventIndex][0]){executeEvent(events[state.eventIndex]);state.eventIndex++}}
@@ -1229,7 +1517,54 @@
   let last=performance.now();function frame(now){const dt=Math.min(.033,(now-last)/1000);last=now;update(dt);render();requestAnimationFrame(frame)}
 
   btnMissile.addEventListener("pointerdown",e=>{e.preventDefault();e.stopPropagation();input.missilePressed=true});btnBomb.addEventListener("pointerdown",e=>{e.preventDefault();e.stopPropagation();input.bombPressed=true});btnPause.addEventListener("click",togglePause);btnSound.addEventListener("click",()=>{audio.init();audio.toggle()});startButton.addEventListener("click",startCampaign);retryButton.addEventListener("click",startCampaign);menuButton.addEventListener("click",showMenu);document.addEventListener("visibilitychange",()=>{if(document.hidden&&state.mode==="playing")setPause(true)});
-  window.__NEON_TIDE_TEST_API__={jumpStage(n){state.stage=clamp(n,1,5);state.stageTime=0;state.eventIndex=0;state.mode="playing";resetArrays();initBackground();player.alive=true;player.invuln=2;showStageIntro()},spawnBoss(){spawnBoss()},defeatBoss(){if(boss){for(const p of boss.parts)p.destroyed=true;boss.coreHp=0}},setMissileType(kind){if(MISSILE_TYPES[kind]){player.missileType=kind;state.message=`기본 미사일: ${MISSILE_TYPES[kind].name}`;state.messageTimer=1}},state};
+  window.__NEON_TIDE_TEST_API__={
+    jumpStage(n){
+      state.stage=clamp(n,1,5);
+      state.stageTime=0;
+      state.eventIndex=0;
+      state.mode="playing";
+      resetArrays();
+      initBackground();
+      player.alive=true;
+      player.invuln=2;
+      showStageIntro()
+    },
+    spawnBoss(){spawnBoss()},
+    defeatBoss(){
+      if(boss){
+        for(const p of boss.parts)p.destroyed=true;
+        boss.coreHp=0
+      }
+    },
+    setMissileType(kind){
+      if(MISSILE_TYPES[kind]){
+        player.missileType=kind;
+        state.message=`기본 미사일: ${MISSILE_TYPES[kind].name}`;
+        state.messageTimer=1
+      }
+    },
+    getBossHealth(){return bossHealthSnapshot()},
+    testPrimaryBossHit(amount=10){
+      if(!boss)return null;
+      const target=boss.parts.find(p=>!p.destroyed);
+      const projectile=target
+        ? {x:boss.x+target.ox,y:boss.y+target.oy,w:10,h:6,dead:false}
+        : {x:boss.x-12,y:boss.y,w:10,h:6,dead:false};
+      hitBoss(projectile,amount,false);
+      return bossHealthSnapshot()
+    },
+    getMovementConfig(){
+      return {
+        speedX:config.playerSpeedX,
+        speedY:config.playerSpeedY,
+        radius:config.stickRadius,
+        deadzone:config.stickDeadzone,
+        bounds:MOVE_BOUNDS
+      }
+    },
+    getEnemyBulletCount(){return eBullets.length},
+    state
+  };
   updateRecordBoard();updateMissileButton();updateBombButton();initBackground();requestAnimationFrame(frame);
   if("serviceWorker" in navigator && location.protocol.startsWith("http")){
     navigator.serviceWorker.register("./sw.js").catch(()=>{});
