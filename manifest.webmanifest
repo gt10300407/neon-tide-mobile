@@ -1,7 +1,7 @@
 {
   "name": "네온 타이드 모바일",
   "short_name": "네온 타이드",
-  "description": "상대 드래그 조작과 회피 가능한 탄막을 적용한 모바일 횡스크롤 슈팅 게임",
+  "description": "플로팅 조이스틱과 중간 난이도 1단계 보스를 적용한 모바일 횡스크롤 슈팅 게임",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",

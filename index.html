@@ -9,7 +9,7 @@
 <meta name="apple-mobile-web-app-title" content="NEON TIDE">
 <link rel="manifest" href="./manifest.webmanifest">
 <link rel="apple-touch-icon" href="./icon-192.png">
-<title>네온 타이드 V4.0 · 상대 드래그 조작</title>
+<title>네온 타이드 V4.1 · 플로팅 조이스틱·중간 보스 난이도</title>
 <style>
   :root{--red:#e23725;--amber:#f2a93b;--cream:#f3ead2;--blue:#2f6fc8;--panel:#05070c}
   *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
@@ -34,7 +34,7 @@
   .result-records{margin-top:10px;color:#f0c56b;font-size:10px;line-height:1.5}
   @media (max-width:620px){.record-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
   .hint{margin-top:10px;color:#8492a5;font-size:10px}
-  .touch-button{position:absolute;z-index:12;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:1px;border-radius:50%;background:rgba(0,0,0,.70);font:700 9px "Courier New",monospace;color:#fff;touch-action:none;line-height:1.05}
+  .touch-button{position:absolute;z-index:20;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:1px;border-radius:50%;background:rgba(0,0,0,.70);font:700 9px "Courier New",monospace;color:#fff;touch-action:none;line-height:1.05}
   .touch-button strong{font-size:12px;letter-spacing:.03em}
   .touch-button small{font-size:7px;opacity:.86}
   .touch-button:active{transform:scale(.94);background:rgba(255,255,255,.14)}
@@ -43,6 +43,64 @@
   #btn-pause{right:calc(7px + env(safe-area-inset-right));top:calc(7px + env(safe-area-inset-top));width:38px;height:32px;border:1px solid #ddd;border-radius:3px}
   #btn-sound{left:calc(7px + env(safe-area-inset-left));top:calc(7px + env(safe-area-inset-top));width:38px;height:32px;border:1px solid #ddd;border-radius:3px}
 
+
+
+  #move-zone{
+    position:absolute;
+    left:0;
+    top:0;
+    bottom:0;
+    width:58%;
+    z-index:11;
+    touch-action:none;
+  }
+  #move-zone::after{
+    content:"MOVE";
+    position:absolute;
+    left:12px;
+    bottom:10px;
+    color:rgba(190,220,255,.32);
+    font-size:8px;
+    font-weight:700;
+    pointer-events:none;
+  }
+  #floating-stick{
+    position:fixed;
+    z-index:18;
+    width:88px;
+    height:88px;
+    margin:-44px 0 0 -44px;
+    border-radius:50%;
+    border:2px solid rgba(155,215,255,.78);
+    background:radial-gradient(circle,rgba(120,190,255,.12) 0 24%,rgba(5,18,34,.72) 25% 68%,rgba(0,0,0,.75) 69%);
+    display:none;
+    pointer-events:none;
+  }
+  #floating-stick.visible{display:block}
+  #floating-stick::before,#floating-stick::after{
+    content:"";
+    position:absolute;
+    left:50%;
+    top:50%;
+    transform:translate(-50%,-50%);
+    background:rgba(160,215,255,.22);
+  }
+  #floating-stick::before{width:70%;height:1px}
+  #floating-stick::after{width:1px;height:70%}
+  #floating-knob{
+    position:absolute;
+    left:50%;
+    top:50%;
+    width:36px;
+    height:36px;
+    margin:-18px 0 0 -18px;
+    border-radius:50%;
+    border:2px solid #8edcff;
+    background:rgba(12,38,60,.95);
+    box-shadow:inset 0 0 0 6px rgba(121,216,255,.11);
+    transform:translate(0px,0px);
+    will-change:transform;
+  }
 
   #rotate-note{position:absolute;inset:0;z-index:40;display:none;place-items:center;background:#000;color:#fff;text-align:center;padding:24px}
   #touch-guide{position:absolute;left:10px;bottom:10px;z-index:13;max-width:205px;padding:8px 10px;border:1px solid #6d7785;background:rgba(0,0,0,.78);color:#f3ead2;font-size:9px;line-height:1.45;pointer-events:none}
@@ -58,8 +116,8 @@
   <div id="menu" class="overlay">
     <div>
       <h1 class="title">NEON TIDE</h1>
-      <div class="subtitle">모바일 캠페인 · 상대 드래그 조작 · 회피 공간 개선</div>
-      <p class="copy">가상 패드를 제거했습니다. 화면을 누른 뒤 손가락을 움직인 거리만큼 기체가 직접 따라오며, 손가락이 멈추면 기체도 즉시 멈춥니다.</p>
+      <div class="subtitle">모바일 캠페인 · 플로팅 조이스틱 · 1단계 보스 중간 난이도</div>
+      <p class="copy">왼쪽 조작 영역을 누르면 그 자리에 조이스틱이 나타납니다. 손가락을 짧게 밀고 그대로 유지하면 기체가 계속 이동하므로 화면 끝까지 손가락을 끌 필요가 없습니다.</p>
       <button id="start-button" class="main-button" type="button">캠페인 시작 · 1단계</button>
       <section class="record-panel" aria-label="누적 캠페인 기록">
         <div class="record-grid">
@@ -74,7 +132,7 @@
         </div>
         <div id="record-history" class="record-history">아직 저장된 출격 기록이 없습니다.</div>
       </section>
-      <div class="hint">게임 화면 빈 곳을 누르고 드래그하세요. 손가락 이동량의 82%만큼 기체가 이동하고, 관성·가속·최소 속도는 없습니다.</div>
+      <div class="hint">화면 왼쪽을 누른 뒤 36픽셀 안에서 방향을 정하고 유지하세요. 가운데에서는 정지하며, 바깥으로 밀수록 이동 속도가 선형으로 증가합니다.</div>
     </div>
   </div>
   <div id="result" class="overlay hidden">
@@ -90,8 +148,10 @@
   <button id="btn-pause" class="touch-button" type="button" aria-label="일시정지"><strong>Ⅱ</strong></button>
   <button id="btn-missile" class="touch-button" type="button" aria-label="특수 유도탄 사용"><small>특수탄</small><strong>6</strong></button>
   <button id="btn-bomb" class="touch-button" type="button" aria-label="폭탄 사용"><small>폭탄</small><strong>2</strong></button>
+  <div id="move-zone" aria-label="이동 조작 영역"></div>
+  <div id="floating-stick"><div id="floating-knob"></div></div>
   <div id="touch-guide" class="hidden">
-    <b>이동</b> 화면 상대 드래그<br>
+    <b>이동</b> 왼쪽 플로팅 조이스틱<br>
     <b>주무기</b> 자동 발사<br>
     <b>무기별 특수탄</b> 파란 버튼<br>
     <b>폭탄</b> 주황 버튼
@@ -116,17 +176,17 @@
     time:document.getElementById("record-time"),
     history:document.getElementById("record-history")
   };
-  const btnMissile=document.getElementById("btn-missile"),btnBomb=document.getElementById("btn-bomb"),btnPause=document.getElementById("btn-pause"),btnSound=document.getElementById("btn-sound"),touchGuide=document.getElementById("touch-guide");
+  const btnMissile=document.getElementById("btn-missile"),btnBomb=document.getElementById("btn-bomb"),btnPause=document.getElementById("btn-pause"),btnSound=document.getElementById("btn-sound"),touchGuide=document.getElementById("touch-guide"),moveZone=document.getElementById("move-zone"),floatingStick=document.getElementById("floating-stick"),floatingKnob=document.getElementById("floating-knob");
   const C={black:"#000",deep:"#02050d",navy:"#07152f",blue:"#0e3274",sky:"#2967bf",cloudDark:"#7395c9",cloud:"#c7d9f1",white:"#f4ecd7",steel:"#a8afbb",steel2:"#646b75",red:"#df3522",red2:"#7c150d",orange:"#f07a19",yellow:"#f4d45b",green:"#6b9e35",green2:"#2d4c1d",cyan:"#79d8ff",purple:"#7357a7",flesh:"#a4483e",ink:"#141721",acid:"#9ecb3b",acidDark:"#284723",violet:"#69498c"};
   const MOVE_BOUNDS={minX:14,maxX:W-14,minY:17,maxY:H-17};
   const config={
     autoFire:true,
     maxPlayerBullets:180,
     maxEnemyBullets:260,
-    playerSpeedX:205,
-    playerSpeedY:225,
-    dragScale:.82,
-    dragMaxStep:16
+    playerSpeedX:188,
+    playerSpeedY:218,
+    stickDeadzone:6,
+    stickRadius:36
   };
   const MISSILE_TYPES={
     vulcan:{name:"기본 발칸",short:"발",color:C.yellow,description:"직선 기본탄"},
@@ -144,10 +204,12 @@
 
   const input={
     keys:new Set(),
-    dragging:false,
-    dragPointerId:null,
-    lastX:0,
-    lastY:0,
+    stickActive:false,
+    stickPointerId:null,
+    stickOriginX:0,
+    stickOriginY:0,
+    axisX:0,
+    axisY:0,
     missilePressed:false,
     bombPressed:false
   };
@@ -163,58 +225,70 @@
   },{passive:false});
   window.addEventListener("keyup",e=>input.keys.delete(e.key.toLowerCase()));
 
-  const pointerPos=e=>{
-    const r=canvas.getBoundingClientRect();
-    return {
-      x:(e.clientX-r.left)/r.width*W,
-      y:(e.clientY-r.top)/r.height*H
-    }
-  };
-
-  function resetDrag(pointerId=null){
-    if(pointerId!==null&&input.dragPointerId!==pointerId)return;
-    input.dragging=false;
-    input.dragPointerId=null
+  function resetStick(pointerId=null){
+    if(pointerId!==null&&input.stickPointerId!==pointerId)return;
+    input.stickActive=false;
+    input.stickPointerId=null;
+    input.axisX=0;
+    input.axisY=0;
+    floatingStick.classList.remove("visible");
+    floatingKnob.style.transform="translate(0px,0px)"
   }
 
-  canvas.addEventListener("pointerdown",e=>{
-    if(state.mode!=="playing"||input.dragging)return;
-    e.preventDefault();
-    const p=pointerPos(e);
-    input.dragging=true;
-    input.dragPointerId=e.pointerId;
-    input.lastX=p.x;
-    input.lastY=p.y;
-    canvas.setPointerCapture(e.pointerId)
-  });
-
-  canvas.addEventListener("pointermove",e=>{
-    if(!input.dragging||input.dragPointerId!==e.pointerId||state.mode!=="playing")return;
-    e.preventDefault();
-    touchGuide.classList.add("hidden");
-
-    const p=pointerPos(e);
-    let dx=p.x-input.lastX;
-    let dy=p.y-input.lastY;
+  function updateStick(e){
+    const dx=e.clientX-input.stickOriginX;
+    const dy=e.clientY-input.stickOriginY;
     const distance=Math.hypot(dx,dy);
+    const deadzone=config.stickDeadzone;
+    const radius=config.stickRadius;
 
-    if(distance>config.dragMaxStep){
-      const scale=config.dragMaxStep/distance;
-      dx*=scale;
-      dy*=scale
+    if(distance<=deadzone){
+      input.axisX=0;
+      input.axisY=0;
+      floatingKnob.style.transform="translate(0px,0px)";
+      return
     }
 
-    player.x=clamp(player.x+dx*config.dragScale,MOVE_BOUNDS.minX,MOVE_BOUNDS.maxX);
-    player.y=clamp(player.y+dy*config.dragScale,MOVE_BOUNDS.minY,MOVE_BOUNDS.maxY);
-    player.tilt=lerp(player.tilt,clamp(dy/8,-1,1),.32);
+    const dirX=dx/distance;
+    const dirY=dy/distance;
+    const visualDistance=Math.min(radius,distance);
+    const strength=clamp((distance-deadzone)/(radius-deadzone),0,1);
 
-    input.lastX=p.x;
-    input.lastY=p.y
+    floatingKnob.style.transform=`translate(${dirX*visualDistance}px,${dirY*visualDistance}px)`;
+    input.axisX=dirX*strength;
+    input.axisY=dirY*strength
+  }
+
+  moveZone.addEventListener("pointerdown",e=>{
+    if(state.mode!=="playing"||input.stickActive)return;
+    e.preventDefault();
+    e.stopPropagation();
+
+    input.stickActive=true;
+    input.stickPointerId=e.pointerId;
+    input.stickOriginX=e.clientX;
+    input.stickOriginY=e.clientY;
+    input.axisX=0;
+    input.axisY=0;
+
+    floatingStick.style.left=`${e.clientX}px`;
+    floatingStick.style.top=`${e.clientY}px`;
+    floatingStick.classList.add("visible");
+    floatingKnob.style.transform="translate(0px,0px)";
+
+    moveZone.setPointerCapture(e.pointerId);
+    touchGuide.classList.add("hidden")
   });
 
-  canvas.addEventListener("pointerup",e=>resetDrag(e.pointerId));
-  canvas.addEventListener("pointercancel",e=>resetDrag(e.pointerId));
-  canvas.addEventListener("lostpointercapture",e=>resetDrag(e.pointerId));
+  moveZone.addEventListener("pointermove",e=>{
+    if(!input.stickActive||input.stickPointerId!==e.pointerId)return;
+    e.preventDefault();
+    updateStick(e)
+  });
+
+  moveZone.addEventListener("pointerup",e=>resetStick(e.pointerId));
+  moveZone.addEventListener("pointercancel",e=>resetStick(e.pointerId));
+  moveZone.addEventListener("lostpointercapture",e=>resetStick(e.pointerId));
 
   const STAGES=[
     {id:1,name:"푸른 대기권",boss:"bio",duration:66,bossAt:62,bg:"blue",events:[
@@ -302,7 +376,7 @@
   const bg={starsFar:[],starsNear:[],cloudsFar:[],cloudsNear:[],rocks:[],debris:[],bubbles:[],planet:{x:385,y:68,r:30},scroll:0};
 
   function resetArrays(){enemies.length=0;pBullets.length=0;eBullets.length=0;missiles.length=0;effects.length=0;pickups.length=0;scoreTexts.length=0;hazards.length=0;boss=null}
-  function resetCampaign(){Object.assign(state,{mode:"playing",time:0,stageTime:0,score:0,stage:1,startStage:1,eventIndex:0,shake:0,flash:0,hitstop:0,message:"",messageTimer:0,combo:0,maxCombo:0,comboTimer:0,multiplier:1,kills:0,bossParts:0,clearTimer:0,transitionTimer:0,bossSpawned:false,hazardPulse:0,recordSaved:false});Object.assign(player,{x:78,y:H/2,lives:5,weapon:1,missiles:6,missileType:"vulcan",bombs:2,fireCd:0,missileCd:0,invuln:2,respawn:0,alive:true,tilt:0});player.trail.length=0;resetDrag();resetArrays();initBackground();updateMissileButton();updateBombButton()}
+  function resetCampaign(){Object.assign(state,{mode:"playing",time:0,stageTime:0,score:0,stage:1,startStage:1,eventIndex:0,shake:0,flash:0,hitstop:0,message:"",messageTimer:0,combo:0,maxCombo:0,comboTimer:0,multiplier:1,kills:0,bossParts:0,clearTimer:0,transitionTimer:0,bossSpawned:false,hazardPulse:0,recordSaved:false});Object.assign(player,{x:78,y:H/2,lives:5,weapon:1,missiles:6,missileType:"vulcan",bombs:2,fireCd:0,missileCd:0,invuln:2,respawn:0,alive:true,tilt:0});player.trail.length=0;resetStick();resetArrays();initBackground();updateMissileButton();updateBombButton()}
   function showTouchGuide(){
     touchGuide.classList.remove("hidden");
     clearTimeout(showTouchGuide.timer);
@@ -487,7 +561,7 @@
       return
     }
 
-    let dx=0,dy=0;
+    let dx=input.axisX,dy=input.axisY;
     if(input.keys.has("arrowleft")||input.keys.has("a"))dx-=1;
     if(input.keys.has("arrowright")||input.keys.has("d"))dx+=1;
     if(input.keys.has("arrowup")||input.keys.has("w"))dy-=1;
@@ -819,11 +893,11 @@
     }
   }
   function shootEnemy(e){
-    const cap=state.stage===1?30:config.maxEnemyBullets;
+    const cap=state.stage===1?34:config.maxEnemyBullets;
     if(eBullets.length>=cap||!player.alive)return;
 
     const a=Math.atan2(player.y-e.y,player.x-e.x);
-    const spd=state.stage===1?74:105+(state.stage-1)*12;
+    const spd=state.stage===1?77:105+(state.stage-1)*12;
 
     if(e.type==="carrier"||e.type==="guardian"||e.type==="rail"){
       const n=state.stage===1?(e.type==="guardian"?3:2):(e.type==="guardian"?5:3);
@@ -870,7 +944,7 @@
   function drawHazards(){for(const h of hazards){if(h.type==="wall"){ctx.fillStyle="#555b65";ctx.fillRect(h.x-h.w/2,h.y-h.h/2,h.w,h.h);ctx.fillStyle="#20242c";ctx.fillRect(h.x-h.w/2+5,h.y-h.h/2+5,h.w-10,h.h-10);ctx.fillStyle=C.red;ctx.fillRect(h.x-3,h.y-3,6,6)}else if(h.type==="gate"){ctx.fillStyle=C.steel2;ctx.fillRect(h.x-7,20,14,H-40);if(h.age<h.warn){ctx.fillStyle="rgba(255,40,30,.35)";ctx.fillRect(h.x-2,20,4,H-40)}else if(h.age<h.warn+h.active){ctx.fillStyle=C.white;ctx.fillRect(h.x-6,20,12,H-40);ctx.fillStyle=C.red;ctx.fillRect(h.x-3,20,6,H-40)}}else if(h.type==="acid"){const rise=Math.sin(Math.min(1,h.age/h.duration)*Math.PI)*58;ctx.fillStyle="rgba(145,205,50,.65)";ctx.fillRect(0,H-rise,W,rise);ctx.fillStyle=C.yellow;for(let x=0;x<W;x+=18)ctx.fillRect(x,H-rise-2+(x%3),12,2)}else if(h.type==="asteroid"){ctx.save();ctx.translate(h.x,h.y);ctx.rotate(h.rot);ctx.fillStyle="#62656d";ctx.fillRect(-h.w/2,-h.h/2,h.w,h.h);ctx.fillStyle="#9599a1";ctx.fillRect(-h.w/4,-h.h/4,h.w/3,3);ctx.restore()}else if(h.type==="coreBeam"){if(h.age<h.warn){ctx.fillStyle="rgba(255,50,35,.35)";ctx.fillRect(0,h.y-2,W,4)}else{ctx.fillStyle=C.white;ctx.fillRect(0,h.y-7,W,14);ctx.fillStyle=C.yellow;ctx.fillRect(0,h.y-5,W,10);ctx.fillStyle=C.red;ctx.fillRect(0,h.y-2,W,4)}}}}
 
   const BOSS_DATA={
-    bio:{name:"생체 순양함",targetX:392,w:176,h:176,core:115,parts:[[-48,-50,36,30,30,"상단 포대"],[-48,50,36,30,30,"하단 포대"],[6,-63,45,24,38,"미사일 발사대"]]},
+    bio:{name:"생체 순양함",targetX:392,w:176,h:176,core:185,parts:[[-48,-50,36,30,48,"상단 포대"],[-48,50,36,30,48,"하단 포대"],[6,-63,45,24,58,"미사일 발사대"]]},
     rail:{name:"레일 요새",targetX:384,w:190,h:142,core:230,parts:[[-58,-43,42,26,66,"상단 레일건"],[-58,43,42,26,66,"하단 레일건"],[12,0,48,38,78,"장갑 잠금장치"]]},
     leviathan:{name:"기계 리바이어던",targetX:390,w:186,h:190,core:260,parts:[[-42,-62,38,30,70,"등 포대"],[-42,62,38,30,70,"복부 포대"],[22,0,38,68,86,"산성 기관"]]},
     twins:{name:"쌍둥이 코어 함대",targetX:388,w:190,h:190,core:300,parts:[[-32,-61,70,44,105,"알파 코어"],[-32,61,70,44,105,"베타 코어"],[28,0,42,54,80,"연결 장치"]]},
@@ -926,8 +1000,8 @@
       laser:0,
       laserWarn:0,
       missileCooldown:0,
-      special:state.stage===1?5.5:1.4,
-      grace:state.stage===1?4.0:1.2,
+      special:state.stage===1?4.2:1.4,
+      grace:state.stage===1?2.6:1.2,
       dead:false,
       dying:0,
       deathHold:0,
@@ -998,7 +1072,7 @@
         if(p.fire<=0){
           bossPartAttack(p);
           p.fire=state.stage===1
-            ?rand(2.15,2.75)
+            ?rand(1.65,2.05)
             :rand(Math.max(.38,.82-state.stage*.06),Math.max(.6,1.15-state.stage*.05))
         }
       }
@@ -1008,7 +1082,7 @@
     if(boss.grace<=0)boss.special-=dt;
     if(boss.special<=0){
       boss.special=state.stage===1
-        ?(boss.phase>=3?4.8:5.8)
+        ?(boss.phase>=3?3.9:4.5)
         :boss.type==="sovereign"?1.15:boss.phase>=2?1.8:2.5;
       bossSpecial()
     }
@@ -1028,12 +1102,12 @@
     if(boss.hp===0&&!boss.dead)destroyBoss()
   }
   function bossPartAttack(p){
-    if(state.stage===1&&eBullets.length>=14)return;
+    if(state.stage===1&&eBullets.length>=18)return;
 
     const sx=boss.x+p.ox-p.w/2;
     const sy=boss.y+p.oy;
     const a=Math.atan2(player.y-sy,player.x-sx);
-    const spd=state.stage===1?68:120+(state.stage-1)*11;
+    const spd=state.stage===1?72:120+(state.stage-1)*11;
     const n=state.stage===1?(boss.phase>=3?2:1):(boss.phase>=3?5:3);
 
     for(let i=0;i<n;i++){
@@ -1066,7 +1140,7 @@
           boss.laserWarn<=0
         ){
           spawnBossMissiles(Math.min(2-liveMissiles,boss.phase===1?1:2));
-          boss.missileCooldown=3.2
+          boss.missileCooldown=2.7
         }
       }else if(boss.phase>=2){
         boss.laserWarn=.65;
@@ -1110,7 +1184,7 @@
     }
   }
   function spawnBossMissiles(n){
-    const cap=state.stage===1?14:config.maxEnemyBullets;
+    const cap=state.stage===1?18:config.maxEnemyBullets;
     if(eBullets.length>=cap||n<=0)return;
     if(state.stage===1&&(boss.laser>0||boss.laserWarn>0))return;
 
@@ -1119,8 +1193,8 @@
     const count=Math.min(n,allowed);
     if(count<=0)return;
 
-    const speed=state.stage===1?56:95;
-    const homing=state.stage===1?.5:1.8;
+    const speed=state.stage===1?62:95;
+    const homing=state.stage===1?.65:1.8;
     const radius=state.stage===1?3:4;
 
     for(let i=0;i<count&&eBullets.length<cap;i++){
@@ -1135,7 +1209,7 @@
           vy:0,
           r:radius,
           kind:"missileWarning",
-          warn:.72,
+          warn:.65,
           launchSpeed:speed,
           launchVy:(i-(count-1)/2)*7,
           launchHoming:homing,
@@ -1900,10 +1974,10 @@
       return {
         speedX:config.playerSpeedX,
         speedY:config.playerSpeedY,
-        deadzonePx:config.padDeadzonePx,
-        maxRadiusPx:config.padMaxRadiusPx,
-        bounds:MOVE_BOUNDS,
-        control:"standard-relative-pad"
+        deadzone:config.stickDeadzone,
+        radius:config.stickRadius,
+        control:"floating-velocity-stick",
+        bounds:MOVE_BOUNDS
       }
     },
     getEnemyBulletCount(){return eBullets.length},
